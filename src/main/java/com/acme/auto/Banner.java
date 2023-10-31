@@ -42,11 +42,22 @@ final class Banner {
 
     // http://patorjk.com/software/taag/#p=display&f=Slant&t=kunde%20v1
     private static final String FIGLET = """
-         _                    _        ____   ___ ____  _____  _  ___   ___
-        | | ___   _ _ __   __| | ___  |___ \\ / _ \\___ \\|___ / / |/ _ \\ / _ \\
-        | |/ / | | | '_ \\ / _` |/ _ \\   __) | | | |__) | |_ \\ | | | | | | | |
-        |   <| |_| | | | | (_| |  __/  / __/| |_| / __/ ___) || | |_| | |_| |
-        |_|\\_\\\\__,_|_| |_|\\__,_|\\___| |_____|\\___/_____|____(_)_|\\___(_)___/
+                                                  tttt                          \s
+                                               ttt:::t                          \s
+                                               t:::::t                          \s
+                                               t:::::t                          \s
+          aaaaaaaaaaaaa  uuuuuu    uuuuuuttttttt:::::ttttttt       ooooooooooo  \s
+          a::::::::::::a u::::u    u::::ut:::::::::::::::::t     oo:::::::::::oo\s
+          aaaaaaaaa:::::au::::u    u::::ut:::::::::::::::::t    o:::::::::::::::o
+                   a::::au::::u    u::::utttttt:::::::tttttt    o:::::ooooo:::::o
+            aaaaaaa:::::au::::u    u::::u      t:::::t          o::::o     o::::o
+          aa::::::::::::au::::u    u::::u      t:::::t          o::::o     o::::o
+         a::::aaaa::::::au::::u    u::::u      t:::::t          o::::o     o::::o
+        a::::a    a:::::au:::::uuuu:::::u      t:::::t    tttttto::::o     o::::o
+        a::::a    a:::::au:::::::::::::::uu    t::::::tttt:::::to:::::ooooo:::::o
+        a:::::aaaa::::::a u:::::::::::::::u    tt::::::::::::::to:::::::::::::::o
+         a::::::::::aa:::a uu::::::::uu:::u      tt:::::::::::tt oo:::::::::::oo\s
+          aaaaaaaaaa  aaaa   uuuuuuuu  uuuu        ttttttttttt     ooooooooooo  \s
         """;
     private static final String JAVA = STR."\{Runtime.version()} - \{System.getProperty("java.vendor")}";
     private static final String OS_VERSION = System.getProperty("os.name");

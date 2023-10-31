@@ -94,13 +94,9 @@ import net.ltgt.gradle.errorprone.errorprone
 val javaVersion: String = System.getProperty("java") ?: libs.versions.javaVersion.get()
 
 val imagePath = project.properties["imagePath"] ?: "juergenzimmermann"
-var enablePreview = if (project.properties["enablePreview"] == false) null else "--enable-preview"
+val enablePreview = if (project.properties["enablePreview"] == false) null else "--enable-preview"
 val alternativeBuildpack = project.properties["buildpack"]
 
-val aot = project.properties["aot"] == true
-if (aot) {
-    enablePreview = null
-}
 val useFlyway = project.properties["flyway"] != false
 
 plugins {
@@ -185,7 +181,7 @@ sweeney {
     enforce(mapOf("type" to "gradle", "expect" to "[8.4,8.4]"))
     // https://www.java.com/releases
     // https://devcenter.heroku.com/articles/java-support#specifying-a-java-version
-    enforce(mapOf("type" to "jdk", "expect" to "[21,21]"))
+    enforce(mapOf("type" to "jdk", "expect" to "[21,21.0.1]"))
     validate()
 }
 
@@ -196,7 +192,7 @@ java {
     // GraalVM unterstuetzt nicht toolchain: deshalb auskommentieren sowie Kommentare bei sourceCompatibility und targetCompatibility entfernen
     toolchain {
         // einschl. sourceCompatibility und targetCompatibility
-        languageVersion = JavaLanguageVersion.of(javaVersion)
+        languageVersion = JavaLanguageVersion.of(libs.versions.javaLanguageVersion.get())
     }
     // sourceCompatibility = JavaVersion.toVersion(javaVersion)
     // targetCompatibility = sourceCompatibility
@@ -207,26 +203,39 @@ repositories {
 
     // https://github.com/spring-projects/spring-framework/wiki/Spring-repository-FAQ
     // https://github.com/spring-projects/spring-framework/wiki/Release-Process
-    maven("https://repo.spring.io/milestone") { mavenContent { releasesOnly() } }
+    maven("https://repo.spring.io/milestone")
 
     // Snapshots von Spring Framework, Spring Boot, Spring Data, Spring Security, Spring for GraphQL, ...
-    // maven("https://repo.spring.io/snapshot") { mavenContent { snapshotsOnly() } }
+    if (libs.versions.springBoot.get().endsWith("-SNAPSHOT")) {
+        maven("https://repo.spring.io/snapshot") { mavenContent { snapshotsOnly() } }
+    }
+    //if (libs.versions.spring.get().endsWith("-SNAPSHOT") || libs.versions.springBoot.get().endsWith("-SNAPSHOT")) {
+    //    maven("https://repo.spring.io/snapshot") { mavenContent { snapshotsOnly() } }
+    //}
 
     // Snapshots von Lombok: https://projectlombok.org/download-edge
-    // maven("https://projectlombok.org/edge-releases") { mavenContent { snapshotsOnly() } }
+    if (libs.versions.lombok.get() == "edge-SNAPSHOT") {
+        maven("https://projectlombok.org/edge-releases") { mavenContent { snapshotsOnly() } }
+    }
 
     // Snapshots von Hibernate
-    // maven("https://oss.sonatype.org/content/repositories/snapshots") { mavenContent { snapshotsOnly() } }
+    //if (libs.versions.hibernate.get().endsWith("-SNAPSHOT")) {
+    //    maven("https://oss.sonatype.org/content/repositories/snapshots") { mavenContent { snapshotsOnly() } }
+    //}
 
     // Snapshots von springdoc-openapi
-    // maven("https://s01.oss.sonatype.org/content/repositories/snapshots") { mavenContent { snapshotsOnly() } }
+    if (libs.versions.springdocOpenapi.get().endsWith("-SNAPSHOT")) {
+        maven("https://s01.oss.sonatype.org/content/repositories/snapshots") { mavenContent { snapshotsOnly() } }
+    }
 
     // Snapshots von JaCoCo
-    // maven("https://oss.sonatype.org/content/repositories/snapshots") {
-    //     mavenContent { snapshotsOnly() }
-    //     // https://docs.gradle.org/current/userguide/jacoco_plugin.html#sec:jacoco_dependency_management
-    //     content { onlyForConfigurations("jacocoAgent", "jacocoAnt") }
-    // }
+    if (libs.versions.jacoco.get().endsWith("-SNAPSHOT")) {
+        maven("https://oss.sonatype.org/content/repositories/snapshots") {
+            mavenContent { snapshotsOnly() }
+            // https://docs.gradle.org/current/userguide/jacoco_plugin.html#sec:jacoco_dependency_management
+            content { onlyForConfigurations("jacocoAgent", "jacocoAnt") }
+        }
+    }
 }
 
 // aktuelle Snapshots laden
@@ -239,17 +248,19 @@ repositories {
 // https://docs.gradle.org/current/userguide/java_library_plugin.html#sec:java_library_separation
 dependencies {
     //implementation(platform("io.micrometer:micrometer-bom:${libs.versions.micrometer.get()}"))
-    //implementation(platform("com.fasterxml.jackson:jackson-bom:${libs.versions.jackson.get()}"))
-    implementation(platform("io.netty:netty-bom:${libs.versions.netty.get()}"))
+    implementation(platform("com.fasterxml.jackson:jackson-bom:${libs.versions.jackson.get()}"))
+    //implementation(platform("io.netty:netty-bom:${libs.versions.netty.get()}"))
     //implementation(platform("io.projectreactor:reactor-bom:${libs.versions.reactor.get()}"))
     //implementation(platform("org.springframework:spring-framework-bom:${libs.versions.spring.get()}"))
     //implementation(platform("org.springframework.data:spring-data-bom:${libs.versions.springData.get()}"))
     //implementation(platform("org.springframework.security:spring-security-bom:${libs.versions.springSecurity.get()}"))
-    //implementation(platform("io.zipkin.reporter2:zipkin-repor1ter-bom:${libs.versions.zipkinReporter.get()}"))
-    //implementation(platform("org.assertj:assertj-bom:${libs.versions.assertj.get()}"))
-    //implementation(platform("org.mockito:mockito-bom:${libs.versions.mockito.get()}"))
-    //implementation(platform("org.junit:junit-bom:${libs.versions.junit.get()}"))
-    implementation(platform("io.qameta.allure:allure-bom:${libs.versions.allureBom.get()}"))
+    implementation(platform("io.zipkin.reporter2:zipkin-reporter-bom:${libs.versions.zipkinReporter.get()}"))
+
+    //testImplementation(platform("org.assertj:assertj-bom:${libs.versions.assertj.get()}"))
+    //testImplementation(platform("org.mockito:mockito-bom:${libs.versions.mockito.get()}"))
+    //testImplementation(platform("org.junit:junit-bom:${libs.versions.junit.get()}"))
+    testImplementation(platform("io.qameta.allure:allure-bom:${libs.versions.allureBom.get()}"))
+
     implementation(platform("org.springframework.boot:spring-boot-starter-parent:${libs.versions.springBoot.get()}"))
     // spring-boot-starter-parent als "Parent POM"
     implementation(platform("org.springdoc:springdoc-openapi:${libs.versions.springdocOpenapi.get()}"))
@@ -294,13 +305,31 @@ dependencies {
     implementation("org.springframework.security:spring-security-crypto")
     implementation("org.springframework.boot:spring-boot-starter-mail")
     implementation("org.springframework.boot:spring-boot-starter-actuator")
-    // https://docs.spring.io/spring-boot/docs/current/reference/html/features.html#features.docker-compose
-    //developmentOnly("org.springframework.boot:spring-boot-docker-compose")
 
-    // Tracing und Metriken durch Micrometer sowie Visualisierung durch Zipkin oder Prometheus/Grafana
-    //implementation("io.micrometer:micrometer-observation")
-    //implementation("io.micrometer:micrometer-tracing-bridge-brave")
-    //implementation("io.zipkin.reporter2:zipkin-reporter-brave")
+    // Tracing durch Micrometer und Visualisierung durch Zipkin
+    if (project.properties["tracing"] == false) {
+        println("Ohne Tracing")
+    } else {
+        implementation("io.micrometer:micrometer-tracing-bridge-brave")
+        implementation("io.zipkin.reporter2:zipkin-reporter-brave")
+    }
+
+    // Metriken durch Micrometer und Visualisierung durch Prometheus/Grafana
+    implementation("io.micrometer:micrometer-registry-prometheus")
+
+    // https://docs.spring.io/spring-framework/reference/6.1/integration/checkpoint-restore.html
+    // https://www.azul.com/blog/superfast-application-startup-java-on-crac
+    // https://piotrminkowski.com/2023/09/05/speed-up-java-startup-on-kubernetes-with-crac
+    // https://github.com/CRaC/example-spring-boot
+    // https://github.com/sdeleuze/spring-boot-crac-demo
+    if (project.properties["crac"] == true) {
+        implementation("org.crac:crac:${libs.versions.crac.get()}")
+    }
+
+    // https://docs.spring.io/spring-boot/docs/current/reference/html/features.html#features.docker-compose
+    if (project.properties["dockerCompose"] == true) {
+        developmentOnly("org.springframework.boot:spring-boot-docker-compose")
+    }
 
     compileOnly("org.projectlombok:lombok")
     annotationProcessor("org.projectlombok:lombok:${libs.versions.lombok.get()}")
@@ -308,8 +337,6 @@ dependencies {
     implementation("org.mapstruct:mapstruct:${libs.versions.mapstruct.get()}")
     annotationProcessor("org.mapstruct:mapstruct-processor:${libs.versions.mapstruct.get()}")
     annotationProcessor("org.projectlombok:lombok-mapstruct-binding:${libs.versions.lombokMapstructBinding.get()}")
-
-    //implementation("org.crac:crac:${libs.versions.crac.get()}")
 
     // https://springdoc.org/v2/#swagger-ui-configuration
     // https://github.com/springdoc/springdoc-openapi
@@ -354,20 +381,20 @@ dependencies {
         //implementation("jakarta.persistence:jakarta.persistence-api:${libs.versions.jakartaPersistence.get()}")
         //implementation("org.hibernate.orm:hibernate-core:${libs.versions.hibernate.get()}")
         //runtimeOnly("org.postgresql:postgresql:${libs.versions.postgres.get()}")
-        //runtimeOnly("com.mysql:mysql-connector-j:${libs.versions.mysql.get()}")
+        runtimeOnly("com.mysql:mysql-connector-j:${libs.versions.mysql.get()}")
         runtimeOnly("com.oracle.database.jdbc:ojdbc11:${libs.versions.oracle.get()}")
         //runtimeOnly("com.h2database:h2:${libs.versions.h2.get()}")
-        if (useFlyway) {
-            implementation("org.flywaydb:flyway-core:${libs.versions.flyway.get()}")
-            runtimeOnly("org.flywaydb:flyway-mysql:${libs.versions.flyway.get()}")
-        }
+        //if (useFlyway) {
+        //    implementation("org.flywaydb:flyway-core:${libs.versions.flyway.get()}")
+        //    runtimeOnly("org.flywaydb:flyway-mysql:${libs.versions.flyway.get()}")
+        //}
         //implementation("com.zaxxer:HikariCP:${libs.versions.hikaricp.get()}")
         //implementation("org.hibernate.validator:hibernate-validator:${libs.versions.hibernateValidator.get()}")
         //compileOnly("org.projectlombok:lombok:${libs.versions.lombok.get()}")
         //implementation("org.apache.tomcat.embed:tomcat-embed-core:${libs.versions.tomcat.get()}")
         //implementation("org.apache.tomcat.embed:tomcat-embed-el:${libs.versions.tomcat.get()}")
         //implementation("com.graphql-java:java-dataloader:${libs.versions.graphqlJavaDataloader.get()}")
-        //implementation("com.graphql-java:graphql-java:${libs.versions.graphqlJava.get()}")
+        implementation("com.graphql-java:graphql-java:${libs.versions.graphqlJava.get()}")
         //implementation("org.eclipse.angus:jakarta.mail:${libs.versions.angusMail.get()}")
         //implementation("org.yaml:snakeyaml:${libs.versions.snakeyaml.get()}")
         //implementation("org.slf4j:slf4j-api:${libs.versions.slf4j.get()}")
@@ -375,21 +402,13 @@ dependencies {
         //implementation("ch.qos.logback:logback-classic:${libs.versions.logback.get()}")
         implementation("org.apache.logging.log4j:log4j-api:${libs.versions.log4j2.get()}")
         implementation("org.apache.logging.log4j:log4j-to-slf4j:${libs.versions.log4j2.get()}")
+        //implementation("io.micrometer:micrometer-tracing-bridge-brave:${libs.versions.micrometerTracingBridgeBrave.get()}")
         //implementation("org.springframework.security:spring-security-rsa:${libs.versions.springSecurityRsa.get()}")
+
+        allureCommandline("io.qameta.allure:allure-commandline:${libs.versions.allureCommandline.get()}")
     }
 }
 /* ktlint-enable comment-spacing */
-
-// FIXME https://github.com/spotbugs/spotbugs/issues/2567
-configurations.named("spotbugs").configure {
-    resolutionStrategy.eachDependency {
-        if (requested.group == "org.ow2.asm") {
-            useVersion("9.5")
-            because("Asm 9.5 is required for JDK 21 support")
-        }
-    }
-}
-
 
 tasks.named<JavaCompile>("compileJava") {
     // https://docs.gradle.org/current/dsl/org.gradle.api.tasks.compile.JavaCompile.html
@@ -454,9 +473,40 @@ tasks.named("bootJar", org.springframework.boot.gradle.tasks.bundling.BootJar::c
     }
 }
 
+// Spring AOT: Kommentar entfernen
+//tasks.named("processAot", org.springframework.boot.gradle.tasks.aot.ProcessAot::class.java) {
+//    if (enablePreview != null) {
+//        jvmArguments = if (jvmArguments.get().isEmpty()) {
+//            listOf(enablePreview)
+//        } else {
+//            val args = jvmArguments.get().toMutableList()
+//            args.add(enablePreview)
+//            args
+//        }
+//    }
+//}
+//tasks.named<JavaCompile>("compileAotJava") {
+//    with(options) {
+//        with(compilerArgs) {
+//            add("--add-opens")
+//            add("--add-exports")
+//            add("-Amapstruct.defaultComponentModel=spring")
+//            if (enablePreview != null) {
+//                add(enablePreview)
+//            }
+//        }
+//        errorprone.errorproneArgs.add("-Xep:MissingSummary:OFF")
+//    }
+//}
+//tasks.named("nativeCompile", org.graalvm.buildtools.gradle.tasks.BuildNativeImageTask::class.java) {
+//    if (enablePreview != null) {
+//        options.get().asCompileOptions().jvmArgs.add("--enable-preview")
+//    }
+//}
+
 // https://github.com/paketo-buildpacks/spring-boot
 tasks.named("bootBuildImage", org.springframework.boot.gradle.tasks.bundling.BootBuildImage::class.java) {
-    // statt "created 43 years ago": https://medium.com/buildpacks/time-travel-with-pack-e0efd8bf05db
+    // statt "created xx years ago": https://medium.com/buildpacks/time-travel-with-pack-e0efd8bf05db
     createdDate = "now"
 
     // default:   imageName = "docker.io/${project.name}:${project.version}"
@@ -469,7 +519,7 @@ tasks.named("bootBuildImage", org.springframework.boot.gradle.tasks.bundling.Boo
         // https://github.com/paketo-buildpacks/bellsoft-liberica/blob/main/buildpack.toml: Umgebungsvariable und Ubuntu Jammy
         // https://releases.ubuntu.com: Jammy = 22.04
         // https://github.com/paketo-buildpacks/bellsoft-liberica/releases
-        "BP_JVM_VERSION" to javaVersion, // default: 17
+        "BP_JVM_VERSION" to libs.versions.javaVersionBuildpacks.get(), // default: 17
         // BPL = Build Packs Launch
         "BPL_JVM_THREAD_COUNT" to "20", // default: 250 (reactive: 50)
         // https://docs.spring.io/spring-boot/docs/current/gradle-plugin/reference/htmlsingle/#build-image.examples.runtime-jvm-configuration
@@ -488,13 +538,15 @@ tasks.named("bootBuildImage", org.springframework.boot.gradle.tasks.bundling.Boo
         // https://github.com/spring-projects/spring-framework/blob/main/framework-docs/src/docs/asciidoc/core/core-aot.adoc
         //"BP_NATIVE_IMAGE" to "true" und paketobuildpacks/builder:tiny als Builder fuer "Native Image"
         //"BP_BOOT_NATIVE_IMAGE_BUILD_ARGUMENTS" to "-H:+ReportExceptionStackTraces",
+
+        // https://docs.spring.io/spring-boot/docs/current/gradle-plugin/reference/htmlsingle/#build-image.examples.publish
     )
 
     // https://paketo.io/docs/howto/java/#use-an-alternative-jvm
     when (alternativeBuildpack) {
         "adoptium" -> {
-            // Eclipse Temurin: JRE 8, 11, 17 (default), 20
-            // https://github.com/paketo-buildpacks/adoptium
+            // Eclipse Temurin: JRE 8, 11, 17 (default, siehe buildpack.toml), 20
+            // https://github.com/paketo-buildpacks/adoptium/releases
             buildpacks = listOf(
                 //"paketo-buildpacks/ca-certificates",
                 "gcr.io/paketo-buildpacks/adoptium",
@@ -502,12 +554,12 @@ tasks.named("bootBuildImage", org.springframework.boot.gradle.tasks.bundling.Boo
             )
             imageName = "${imageName.get()}-eclipse"
             println("")
-            println("Eclipse Temurin als JVM: Buildpacks unterstuetzen NICHT Java 21")
+            println("Buildpacks: JVM durch Eclipse Temurin (Eclipse Temurin 21 NICHT verfuegbar)")
             println("")
         }
-        "azul" -> {
-            // Azul Zulu: JRE 8, 11, 17 (default), 21
-            // https://github.com/paketo-buildpacks/azul-zulu: buildpack.toml
+        "azul-zulu" -> {
+            // Azul Zulu: JRE 8, 11, 17 (default, siehe buildpack.toml), 21
+            // https://github.com/paketo-buildpacks/azul-zulu/releases
             buildpacks = listOf(
                 "gcr.io/paketo-buildpacks/azul-zulu",
                 //"paketobuildpacks/azul-zulu",
@@ -515,15 +567,36 @@ tasks.named("bootBuildImage", org.springframework.boot.gradle.tasks.bundling.Boo
             )
             imageName = "${imageName.get()}-azul"
             println("")
-            println("Azul Zulu als JVM")
+            println("Buildpacks: JVM durch Azul Zulu")
+            println("")
+        }
+        "sap-machine" -> {
+            // SapMachine: JRE 11, 17 (default, siehe buildpack.toml), 21
+            // https://github.com/paketo-buildpacks/sap-machine/releases
+            buildpacks = listOf(
+                "gcr.io/paketo-buildpacks/sap-machine",
+                "paketo-buildpacks/java",
+            )
+            imageName = "${imageName.get()}-sapmachine"
+            println("")
+            println("Buildpacks: JVM durch SapMachine")
             println("")
         }
         else -> {
+            // Bellsoft Liberica: JRE 8, 11, 17 (default, siehe buildpack.toml), 21
+            // https://github.com/paketo-buildpacks/bellsoft-liberica/releases
             println("")
-            println("Default Buildpack mit Bellsoft Liberica als JVM")
+            println("Buildpacks: Default = JVM durch Bellsoft Liberica")
             println("")
 
-            // Kein JRE: Amazon Corretto, Oracle
+            // Amazon Coretto: kein JRE
+            // https://github.com/paketo-buildpacks/amazon-corretto/releases
+            // Oracle: kein JRE
+            // https://github.com/paketo-buildpacks/oracle/releases
+            // Microsoft OpenJDK: kein JRE
+            // https://github.com/paketo-buildpacks/microsoft-openjdk/releases
+            // Alibaba Dragonwell: kein JRE
+            // https://github.com/paketo-buildpacks/alibaba-dragonwell/releases
         }
     }
 
@@ -598,11 +671,11 @@ allure {
     }
 
     // https://github.com/allure-framework/allure-gradle#customizing-allure-commandline-download
-    // commandline {
-    //     group = "io.qameta.allure"
-    //     module = "allure-commandline"
-    //     extension = "zip"
-    // }
+    //commandline {
+    //  group = "io.qameta.allure"
+    //  module = "allure-commandline"
+    //  extension = "zip"
+    //}
 }
 
 jacoco {
@@ -661,6 +734,7 @@ spotbugs {
 tasks.named("spotbugsMain", com.github.spotbugs.snom.SpotBugsTask::class.java) {
     reportLevel = com.github.spotbugs.snom.Confidence.LOW
     reports.create("html") { required = true }
+    // val excludePath = File("config/spotbugs/exclude.xml")
     val excludePath = Paths.get("config", "spotbugs", "exclude.xml")
     excludeFilter = file(excludePath)
 }
@@ -773,8 +847,8 @@ tasks.named("asciidoctor", org.asciidoctor.gradle.jvm.AsciidoctorTask::class) {
     // https://github.com/asciidoctor/asciidoctor-gradle-plugin/issues/597#issuecomment-844352804
     inProcess = org.asciidoctor.gradle.base.process.ProcessMode.JAVA_EXEC
     forkOptions {
-        @Suppress("StringLiteralDuplication")
-        jvmArgs("--add-opens", "java.base/sun.nio.ch=ALL-UNNAMED", "--add-opens", "java.base/java.io=ALL-UNNAMED")
+        // @Suppress("StringLiteralDuplication")
+        // jvmArgs("--add-opens", "java.base/sun.nio.ch=ALL-UNNAMED", "--add-opens", "java.base/java.io=ALL-UNNAMED")
     }
 
     doLast {
@@ -804,7 +878,7 @@ tasks.named("asciidoctorPdf", org.asciidoctor.gradle.jvm.pdf.AsciidoctorPdfTask:
     // https://github.com/asciidoctor/asciidoctor-gradle-plugin/issues/597#issuecomment-844352804
     inProcess = org.asciidoctor.gradle.base.process.ProcessMode.JAVA_EXEC
     forkOptions {
-        jvmArgs("--add-opens", "java.base/sun.nio.ch=ALL-UNNAMED", "--add-opens", "java.base/java.io=ALL-UNNAMED")
+        // jvmArgs("--add-opens", "java.base/sun.nio.ch=ALL-UNNAMED", "--add-opens", "java.base/java.io=ALL-UNNAMED")
     }
 
     doLast {
