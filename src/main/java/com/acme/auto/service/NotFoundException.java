@@ -33,17 +33,17 @@ public final class NotFoundException extends RuntimeException {
     /**
      * Suchkriterien, zu denen nichts gefunden wurde.
      */
-    private final Map<String, String> requestParams;
+    private final Map<String, String> suchkriterien;
 
     NotFoundException(final UUID id) {
         super(STR."Kein Auto mit der ID \{id} gefunden.");
         this.id = id;
-        this.requestParams = null;
+        this.suchkriterien = null;
     }
 
-    NotFoundException(final Map<String, String> requestParams) {
-        super(STR."Keine Autos mit Suchkriterien \{requestParams} gefunden");
+    NotFoundException(final Map<String, String> suchkriterien) {
+        super(STR."Keine Autos gefunden: suchkriterien=\{suchkriterien}");
         this.id = null;
-        this.requestParams = requestParams;
+        this.suchkriterien = suchkriterien;
     }
 }

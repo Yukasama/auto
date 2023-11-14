@@ -15,27 +15,67 @@ type Query {
 type Mutation {
   "Ein neues Auto anlegen"
   create(input: AutoInput!): CreatePayload
-
-  "Ein vorhandenes Auto aktualisieren"
-  update(input: AutoInput!)
 }
 
 type Auto {
   id: ID
   name: String!
   marke: String!
+  kennzeichen: String
+  pferdeStaerke: Int
+  preis: String!
+  besitzer: Besitzer
+  reparaturen(first: Int!): [Reparatur!]
 }
 
-type AutoInput {
+type Besitzer {
+  id: ID
+  vorname: String!
+  nachname: String!
+}
+
+type Reparatur {
+  id: ID
+  beschreibung: String!
+  datum: String!
+  kosten: String!
+}
+
+input Suchkriterien {
+  name: String
+  kennzeichen: String
+}
+
+input AutoInput {
   name: String!
   marke: Marke!
+  kennzeichen: String
+  pferdeStaerke: Int
+  preis: String!
+  besitzer: Besitzer
+  reparaturen: [Reparatur!]
 }
 
+"Enum für Marke eines Autos"
 enum Marke {
   VW
-  BMW
+  M
+  F
+  T
 }
 
+input BesitzerInput {
+  vorname: String!
+  nachname: String!
+}
+
+input ReparaturInput {
+  beschreibung: String!
+  datum: String!
+  kosten: String!
+}
+
+"Rückgabetyp beim Neuanlegen eines Autos"
 type CreatePayload {
   "ID des neu angelegten Autos"
   id: String!

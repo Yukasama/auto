@@ -5,6 +5,7 @@ import java.time.LocalDate;
 import java.util.UUID;
 
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Past;
 import lombok.Builder;
 import lombok.EqualsAndHashCode;
@@ -43,6 +44,7 @@ public class Reparatur {
      * @return Reparatur Datum
      */
     @Past
+    @NotNull
     private LocalDate datum;
 
     /**

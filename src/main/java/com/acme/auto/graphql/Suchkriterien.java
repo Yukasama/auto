@@ -6,7 +6,7 @@ import java.util.Map;
 record Suchkriterien (
     String name,
 
-    String marke
+    String kennzeichen
 ) {
     /**
      * Konvertierung in eine Map.
@@ -17,8 +17,8 @@ record Suchkriterien (
         if (name != null) {
             map.put("nachname", name);
         }
-        if (marke != null) {
-            map.put("email", marke);
+        if (kennzeichen != null) {
+            map.put("email", kennzeichen);
         }
         return map;
     }

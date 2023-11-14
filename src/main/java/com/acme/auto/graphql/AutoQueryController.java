@@ -22,16 +22,26 @@ import static java.util.Collections.emptyMap;
 public class AutoQueryController {
     private final AutoReadService service;
 
+    /**
+     * Suche anhand der Auto-ID
+     * @param id ID des gesuchten Autos
+     * @return Auto mit passender ID
+     */
     @QueryMapping
-    Auto auto(@Argument UUID id) {
+    Auto auto(@Argument final UUID id) {
         log.debug(STR."auto: \{id}");
         final var auto = service.findById(id);
         log.debug(STR."auto: \{auto}");
         return auto;
     }
 
+    /**
+     * Rückgabe von Autos anhand von Suchkriterien
+     * @param input Suchkriterien für das Filtern von Autos
+     * @return Alle gefundenen Autos
+     */
     @QueryMapping
-    Collection<Auto> autos(@Argument Optional<Suchkriterien> input) {
+    Collection<Auto> autos(@Argument final Optional<Suchkriterien> input) {
         log.debug(STR."autos: \{input}");
         final var suchkriterien = input.map(Suchkriterien::toMap)
             .orElse(emptyMap());

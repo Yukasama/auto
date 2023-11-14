@@ -13,6 +13,7 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
+import org.hibernate.validator.constraints.UniqueElements;
 
 /**
  * Daten eines Autos. In DDD ist Auto ist ein Aggregate Root.
@@ -91,5 +92,6 @@ public class Auto {
      */
     @Valid
     @ToString.Exclude
+    @UniqueElements
     private List<Reparatur> reparaturen;
 }
