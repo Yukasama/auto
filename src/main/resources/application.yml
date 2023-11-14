@@ -82,12 +82,7 @@ spring:
         #  action: create
         #  create-target: create.sql
   # siehe org.springframework.boot.autoconfigure.jackson.JacksonProperties
-  jackson:
-    default-property-inclusion: non_null
-    # siehe com.fasterxml.jackson.databind.DeserializationFeature
-    deserialization.read-enums-using-to-string: true
-    # siehe com.fasterxml.jackson.databind.SerializationFeature
-    serialization.write-enums-using-to-string: true
+  jackson.default-property-inclusion: non_null
   lifecycle.timeout-per-shutdown-phase: 3s
   mail:
     host: smtp.acme.com
@@ -112,18 +107,16 @@ spring:
   native.remove-unused-autoconfig: true
   security.user.password: p
   spel.ignore: true
-  # https://docs.spring.io/spring-boot/docs/current/reference/htmlsingle/#features.ssl.jks
-  ssl.bundle.jks.microservice:
-    key:
-      alias: microservice
+  # https://docs.spring.io/spring-boot/docs/current/reference/htmlsingle/#features.ssl.pem
+  # https://spring.io/blog/2023/06/07/securing-spring-boot-applications-with-ssl
+  ssl.bundle.pem.microservice:
+    # https://spring.io/blog/2023/11/07/ssl-hot-reload-in-spring-boot-3-2-0
+    reload-on-update: true
     keystore:
-      location: classpath:keystore.p12
-      password: zimmermann
-      type: PKCS12
+      private-key: "classpath:private-key.pem"
+      certificate: "classpath:certificate.crt"
     truststore:
-      location: classpath:truststore.p12
-      password: zimmermann
-      type: PKCS12
+      certificate: "classpath:certificate.crt"
   threads.virtual.enabled: true
 
 info.app:

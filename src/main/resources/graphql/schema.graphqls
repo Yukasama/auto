@@ -1,0 +1,42 @@
+schema {
+  query: Query
+  mutation: Mutation
+}
+
+"Suche nach Autodaten"
+type Query {
+  "Suche Autodaten anhand der ID"
+  auto(id: ID!): Auto
+
+  "Suche Autodaten anhand Suchkriterien"
+  autos(input: Suchkriterien): [Auto!]
+}
+
+type Mutation {
+  "Ein neues Auto anlegen"
+  create(input: AutoInput!): CreatePayload
+
+  "Ein vorhandenes Auto aktualisieren"
+  update(input: AutoInput!)
+}
+
+type Auto {
+  id: ID
+  name: String!
+  marke: String!
+}
+
+type AutoInput {
+  name: String!
+  marke: Marke!
+}
+
+enum Marke {
+  VW
+  BMW
+}
+
+type CreatePayload {
+  "ID des neu angelegten Autos"
+  id: String!
+}

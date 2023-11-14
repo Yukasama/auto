@@ -16,6 +16,6 @@
  */
 
 /**
- * Microservice "kunde".
+ * Microservice "auto".
  */
 package com.acme.auto;

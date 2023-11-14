@@ -3,6 +3,11 @@ package com.acme.auto.entity;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.UUID;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Positive;
 import lombok.Builder;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -19,6 +24,11 @@ import lombok.ToString;
 @SuppressWarnings({"JavadocDeclaration"})
 public class Auto {
     /**
+     * Muster für ein deutsches Kennzeichen
+     */
+    public static final String KENNZEICHEN_PATTERN = "^[A-ZÄÖÜ]{1,3}-[A-Z]{1,2}-[1-9][0-9]{0,3}E?";
+
+    /**
      * Die ID des Autos
      * @param id Auto ID
      * @return Auto ID
@@ -31,6 +41,7 @@ public class Auto {
      * @param name Autoname
      * @return Autoname
      */
+    @NotBlank
     private String name;
 
     /**
@@ -38,13 +49,23 @@ public class Auto {
      * @param marke Automarke
      * @return Automarke
      */
+    @NotNull
     private Marke marke;
+
+    /**
+     * Das Kennzeichen des Autos
+     * @param kennzeichen Kennzeichen des Autos
+     * @return Kennzeichen des Autos
+     */
+    @Pattern(regexp = KENNZEICHEN_PATTERN)
+    private String kennzeichen;
 
     /**
      * Wie viel Pferdestärke hat das Auto
      * @param pferdeStaerke Die Pferdestärke
      * @return Die Pferdestärke
      */
+    @Positive
     private int pferdeStaerke;
 
     /**
@@ -59,6 +80,7 @@ public class Auto {
      * @param besitzer Autobesitzer
      * @return Autobesitzer
      */
+    @Valid
     @ToString.Exclude
     private Besitzer besitzer;
 
@@ -67,6 +89,7 @@ public class Auto {
      * @param reparaturen Autoreparaturen
      * @return Autoreparaturen
      */
+    @Valid
     @ToString.Exclude
     private List<Reparatur> reparaturen;
 }

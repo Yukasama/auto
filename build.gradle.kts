@@ -33,7 +33,7 @@
 //        .\gradlew jacocoTestCoverageVerification
 //        .\gradlew allureServe
 //              EINMALIG>>   .\gradlew downloadAllure
-//        .\gradlew checkstyleMain checkstyleTest spotbugsMain spotbugsTest
+//        .\gradlew checkstyleMain checkstyleTest spotbugsMain spotbugsTest spotlessApply
 //        .\gradlew sonar
 //        .\gradlew buildHealth
 //        .\gradlew reason --id com.fasterxml.jackson.core:jackson-annotations:...
@@ -81,7 +81,7 @@
 //
 //  14) Initialisierung des Gradle Wrappers in der richtigen Version
 //      dazu ist ggf. eine Internetverbindung erforderlich
-//        gradle wrapper --gradle-version=8.4 --distribution-type=bin
+//        gradle wrapper --gradle-version=8.5-rc-1 --distribution-type=bin
 
 // https://github.com/gradle/kotlin-dsl/tree/master/samples
 // https://docs.gradle.org/current/userguide/kotlin_dsl.html
@@ -97,7 +97,9 @@ val imagePath = project.properties["imagePath"] ?: "juergenzimmermann"
 val enablePreview = if (project.properties["enablePreview"] == false) null else "--enable-preview"
 val alternativeBuildpack = project.properties["buildpack"]
 
-val useFlyway = project.properties["flyway"] != false
+val mapStructVerbose = project.properties["mapStructVerbose"] == "true" || project.properties["mapStructVerbose"] == "TRUE"
+val useTracing = project.properties["tracingZipkin"] != "false" && project.properties["tracingZipkin"] != "FALSE"
+val useFlyway = project.properties["flyway"] != "false" && project.properties["flyway"] != "FALSE"
 
 plugins {
     java
@@ -119,6 +121,9 @@ plugins {
 
     // https://spotbugs.readthedocs.io/en/latest/gradle.html
     id("com.github.spotbugs") version libs.versions.spotbugsPlugin.get()
+
+    // https://github.com/diffplug/spotless
+    id("com.diffplug.spotless") version libs.versions.spotless.get()
 
     // https://docs.sonarqube.org/latest/analyzing-source-code/scanners/sonarscanner-for-gradle
     id("org.sonarqube") version libs.versions.sonarqube.get()
@@ -178,10 +183,10 @@ version = "2023.10.0"
 val imageTag = project.properties["imageTag"] ?: project.version.toString()
 
 sweeney {
-    enforce(mapOf("type" to "gradle", "expect" to "[8.4,8.4]"))
+    enforce(mapOf("type" to "gradle", "expect" to "[8.5,8.5]"))
     // https://www.java.com/releases
     // https://devcenter.heroku.com/articles/java-support#specifying-a-java-version
-    enforce(mapOf("type" to "jdk", "expect" to "[21,21.0.1]"))
+    enforce(mapOf("type" to "jdk", "expect" to "[21.0.1,21.0.1]"))
     validate()
 }
 
@@ -247,9 +252,9 @@ repositories {
 @Suppress("CommentSpacing")
 // https://docs.gradle.org/current/userguide/java_library_plugin.html#sec:java_library_separation
 dependencies {
-    //implementation(platform("io.micrometer:micrometer-bom:${libs.versions.micrometer.get()}"))
+    implementation(platform("io.micrometer:micrometer-bom:${libs.versions.micrometer.get()}"))
     implementation(platform("com.fasterxml.jackson:jackson-bom:${libs.versions.jackson.get()}"))
-    //implementation(platform("io.netty:netty-bom:${libs.versions.netty.get()}"))
+    implementation(platform("io.netty:netty-bom:${libs.versions.netty.get()}"))
     //implementation(platform("io.projectreactor:reactor-bom:${libs.versions.reactor.get()}"))
     //implementation(platform("org.springframework:spring-framework-bom:${libs.versions.spring.get()}"))
     //implementation(platform("org.springframework.data:spring-data-bom:${libs.versions.springData.get()}"))
@@ -257,8 +262,8 @@ dependencies {
     implementation(platform("io.zipkin.reporter2:zipkin-reporter-bom:${libs.versions.zipkinReporter.get()}"))
 
     //testImplementation(platform("org.assertj:assertj-bom:${libs.versions.assertj.get()}"))
-    //testImplementation(platform("org.mockito:mockito-bom:${libs.versions.mockito.get()}"))
-    //testImplementation(platform("org.junit:junit-bom:${libs.versions.junit.get()}"))
+    testImplementation(platform("org.mockito:mockito-bom:${libs.versions.mockito.get()}"))
+    testImplementation(platform("org.junit:junit-bom:${libs.versions.junit.get()}"))
     testImplementation(platform("io.qameta.allure:allure-bom:${libs.versions.allureBom.get()}"))
 
     implementation(platform("org.springframework.boot:spring-boot-starter-parent:${libs.versions.springBoot.get()}"))
@@ -277,7 +282,7 @@ dependencies {
     // HttpGraphQlClient benoetigt WebClient mit Project Reactor
     implementation("org.springframework.boot:spring-boot-starter-webflux")
     implementation("org.springframework.boot:spring-boot-starter-json")
-    // implementation("org.springframework.boot:spring-boot-starter-graphql")
+    implementation("org.springframework.boot:spring-boot-starter-graphql")
     implementation("org.springframework.boot:spring-boot-starter-hateoas")
     implementation("org.springframework.boot:spring-boot-starter-validation")
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
@@ -307,9 +312,7 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-actuator")
 
     // Tracing durch Micrometer und Visualisierung durch Zipkin
-    if (project.properties["tracing"] == false) {
-        println("Ohne Tracing")
-    } else {
+    if (useTracing) {
         implementation("io.micrometer:micrometer-tracing-bridge-brave")
         implementation("io.zipkin.reporter2:zipkin-reporter-brave")
     }
@@ -324,11 +327,6 @@ dependencies {
     // https://github.com/sdeleuze/spring-boot-crac-demo
     if (project.properties["crac"] == true) {
         implementation("org.crac:crac:${libs.versions.crac.get()}")
-    }
-
-    // https://docs.spring.io/spring-boot/docs/current/reference/html/features.html#features.docker-compose
-    if (project.properties["dockerCompose"] == true) {
-        developmentOnly("org.springframework.boot:spring-boot-docker-compose")
     }
 
     compileOnly("org.projectlombok:lombok")
@@ -349,13 +347,12 @@ dependencies {
 
     compileOnly("com.github.spotbugs:spotbugs-annotations:${libs.versions.spotbugs.get()}")
 
+    // https://docs.spring.io/spring-boot/docs/current/reference/htmlsingle/#using-boot-devtools
+    developmentOnly("org.springframework.boot:spring-boot-devtools:${libs.versions.springBoot.get()}")
     // https://docs.spring.io/spring-boot/docs/current/reference/html/features.html#features.docker-compose
     if (project.properties["dockerCompose"] == "true") {
         developmentOnly("org.springframework.boot:spring-boot-docker-compose")
     }
-
-    // https://docs.spring.io/spring-boot/docs/current/reference/htmlsingle/#using-boot-devtools
-    //developmentOnly("org.springframework.boot:spring-boot-devtools:${libs.versions.springBoot.get()}")
 
     // einschl. JUnit und Mockito
     testImplementation("org.springframework.boot:spring-boot-starter-test") {
@@ -379,16 +376,16 @@ dependencies {
         //implementation("org.springframework.graphql:spring-graphql:${libs.versions.springGraphQL.get()}")
         //implementation("org.springframework.hateoas:spring-hateoas:${libs.versions.springHateoas.get()}")
         //implementation("jakarta.persistence:jakarta.persistence-api:${libs.versions.jakartaPersistence.get()}")
-        //implementation("org.hibernate.orm:hibernate-core:${libs.versions.hibernate.get()}")
+        implementation("org.hibernate.orm:hibernate-core:${libs.versions.hibernate.get()}")
         //runtimeOnly("org.postgresql:postgresql:${libs.versions.postgres.get()}")
         runtimeOnly("com.mysql:mysql-connector-j:${libs.versions.mysql.get()}")
-        runtimeOnly("com.oracle.database.jdbc:ojdbc11:${libs.versions.oracle.get()}")
+        //runtimeOnly("com.oracle.database.jdbc:ojdbc11:${libs.versions.oracle.get()}")
         //runtimeOnly("com.h2database:h2:${libs.versions.h2.get()}")
         //if (useFlyway) {
         //    implementation("org.flywaydb:flyway-core:${libs.versions.flyway.get()}")
         //    runtimeOnly("org.flywaydb:flyway-mysql:${libs.versions.flyway.get()}")
         //}
-        //implementation("com.zaxxer:HikariCP:${libs.versions.hikaricp.get()}")
+        implementation("com.zaxxer:HikariCP:${libs.versions.hikaricp.get()}")
         //implementation("org.hibernate.validator:hibernate-validator:${libs.versions.hibernateValidator.get()}")
         //compileOnly("org.projectlombok:lombok:${libs.versions.lombok.get()}")
         //implementation("org.apache.tomcat.embed:tomcat-embed-core:${libs.versions.tomcat.get()}")
@@ -402,7 +399,7 @@ dependencies {
         //implementation("ch.qos.logback:logback-classic:${libs.versions.logback.get()}")
         implementation("org.apache.logging.log4j:log4j-api:${libs.versions.log4j2.get()}")
         implementation("org.apache.logging.log4j:log4j-to-slf4j:${libs.versions.log4j2.get()}")
-        //implementation("io.micrometer:micrometer-tracing-bridge-brave:${libs.versions.micrometerTracingBridgeBrave.get()}")
+        implementation("io.micrometer:micrometer-tracing-bridge-brave:${libs.versions.micrometerTracingBridgeBrave.get()}")
         //implementation("org.springframework.security:spring-security-rsa:${libs.versions.springSecurityRsa.get()}")
 
         allureCommandline("io.qameta.allure:allure-commandline:${libs.versions.allureCommandline.get()}")
@@ -426,7 +423,9 @@ tasks.named<JavaCompile>("compileJava") {
             add("--add-exports")
 
             // https://mapstruct.org/documentation/stable/reference/html/#configuration-options
-            add("-Amapstruct.verbose=true")
+            if (mapStructVerbose) {
+                add("-Amapstruct.verbose=true")
+            }
             add("-Amapstruct.defaultComponentModel=spring")
             //add("-Amapstruct.unmappedTargetPolicy=ERROR")
             //add("-Amapstruct.unmappedSourcePolicy=ERROR")
@@ -463,13 +462,17 @@ tasks.named<JavaCompile>("compileTestJava") {
 
 tasks.named("bootJar", org.springframework.boot.gradle.tasks.bundling.BootJar::class.java) {
     doLast {
-        println("")
-        println("Aufruf der ausfuehrbaren JAR-Datei:")
-        @Suppress("MaxLineLength")
         println(
-            "java -D'LOG_PATH=./build/log' -D'javax.net.ssl.trustStore=./src/main/resources/truststore.p12' -D'javax.net.ssl.trustStorePassword=zimmermann' -jar build/libs/${archiveFileName.get()} --spring.profiles.active=dev [--debug]", // ktlint-disable max-line-length
+            """
+            |
+            |Aufruf der ausfuehrbaren JAR-Datei:
+            |
+            |java --enable-preview -jar build/libs/kunde-2023.10.0.jar --spring.profiles.active=dev `
+            |--spring.ssl.bundle.pem.microservice.keystore.private-key=./src/main/resources/private-key.pem `
+            |--spring.ssl.bundle.pem.microservice.keystore.certificate=./src/main/resources/certificate.crt `
+            |--spring.ssl.bundle.pem.microservice.truststore.certificate=./src/main/resources/certificate.crt [--debug]
+            """.trimMargin("|")
         )
-        println("")
     }
 }
 
@@ -545,7 +548,7 @@ tasks.named("bootBuildImage", org.springframework.boot.gradle.tasks.bundling.Boo
     // https://paketo.io/docs/howto/java/#use-an-alternative-jvm
     when (alternativeBuildpack) {
         "adoptium" -> {
-            // Eclipse Temurin: JRE 8, 11, 17 (default, siehe buildpack.toml), 20
+            // Eclipse Temurin: JRE 8, 11, 17 (default, siehe buildpack.toml), 21
             // https://github.com/paketo-buildpacks/adoptium/releases
             buildpacks = listOf(
                 //"paketo-buildpacks/ca-certificates",
@@ -620,8 +623,8 @@ tasks.named("bootRun", org.springframework.boot.gradle.tasks.run.BootRun::class.
 
 tasks.named<Test>("test") {
     useJUnitPlatform {
-        includeTags = when (System.getProperty("test")) {
-            "all", null -> setOf("integration", "unit")
+        includeTags = when (project.properties["test"]) {
+            "all" -> setOf("integration", "unit")
             "integration" -> setOf("integration")
             "rest" -> setOf("rest")
             "rest-get" -> setOf("rest-get")
@@ -632,18 +635,20 @@ tasks.named<Test>("test") {
             "unit" -> setOf("unit")
             "service-read" -> setOf("service-read")
             "service-write" -> setOf("service-write")
-            else -> throw IllegalArgumentException("Fehler bei -Dtest=...")
+            else -> setOf("integration", "unit")
         }
     }
 
-    systemProperty("javax.net.ssl.trustStore", "./src/main/resources/truststore.p12")
-    systemProperty("javax.net.ssl.trustStorePassword", "zimmermann")
     systemProperty("spring.profiles.active", "dev")
     systemProperty("junit.platform.output.capture.stdout", true)
     systemProperty("junit.platform.output.capture.stderr", true)
 
     if (enablePreview != null) {
         jvmArgs(enablePreview)
+    }
+
+    if (project.properties["showTestStandardStreams"] == "true") {
+        testLogging.showStandardStreams = true
     }
 
     // https://docs.gradle.org/current/userguide/java_testing.html#sec:debugging_java_tests
@@ -847,8 +852,8 @@ tasks.named("asciidoctor", org.asciidoctor.gradle.jvm.AsciidoctorTask::class) {
     // https://github.com/asciidoctor/asciidoctor-gradle-plugin/issues/597#issuecomment-844352804
     inProcess = org.asciidoctor.gradle.base.process.ProcessMode.JAVA_EXEC
     forkOptions {
-        // @Suppress("StringLiteralDuplication")
-        // jvmArgs("--add-opens", "java.base/sun.nio.ch=ALL-UNNAMED", "--add-opens", "java.base/java.io=ALL-UNNAMED")
+        @Suppress("StringLiteralDuplication")
+        jvmArgs("--add-opens", "java.base/sun.nio.ch=ALL-UNNAMED", "--add-opens", "java.base/java.io=ALL-UNNAMED")
     }
 
     doLast {
@@ -878,13 +883,13 @@ tasks.named("asciidoctorPdf", org.asciidoctor.gradle.jvm.pdf.AsciidoctorPdfTask:
     // https://github.com/asciidoctor/asciidoctor-gradle-plugin/issues/597#issuecomment-844352804
     inProcess = org.asciidoctor.gradle.base.process.ProcessMode.JAVA_EXEC
     forkOptions {
-        // jvmArgs("--add-opens", "java.base/sun.nio.ch=ALL-UNNAMED", "--add-opens", "java.base/java.io=ALL-UNNAMED")
+        jvmArgs("--add-opens", "java.base/sun.nio.ch=ALL-UNNAMED", "--add-opens", "java.base/java.io=ALL-UNNAMED")
     }
 
     doLast {
         val outputPath = Paths.get(layout.buildDirectory.asFile.get().absolutePath, "docs", "asciidocPdf")
-        val outputFile = Paths.get(outputPath.toString(), "entwicklerhandbuch.pdf")
-        println("Das Entwicklerhandbuch ist in $outputFile")
+        val outputFile = Paths.get(outputPath.toString(), "projekthandbuch.pdf")
+        println("Das Projekthandbuch ist in $outputFile")
     }
 }
 

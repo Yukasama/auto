@@ -2,13 +2,18 @@ package com.acme.auto.rest;
 
 import com.acme.auto.entity.Auto;
 import com.acme.auto.service.AutoReadService;
+import io.swagger.v3.oas.annotations.OpenAPIDefinition;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import java.util.Collection;
+import java.util.Map;
 import java.util.UUID;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
@@ -36,22 +41,28 @@ public class AutoGetController {
      */
     @SuppressWarnings("StringTemplateMigration")
     @GetMapping(path = "{id:" + ID_PATTERN + "}", produces = APPLICATION_JSON_VALUE)
+    @Operation(summary = "Suche mit Auto-ID", tags = "Suchen")
+    @ApiResponse(responseCode = "200", description = "Auto gefunden")
+    @ApiResponse(responseCode = "404", description = "Auto nicht gefunden")
     Auto getById(@PathVariable final UUID id) {
-        log.debug("getById: id={}", id);
+        log.debug(STR."getById: id=\{id}");
         final var auto = service.findById(id);
-        log.debug("getById: {}", auto);
+        log.debug(STR."getById: \{auto}");
         return auto;
     }
 
     /**
-     * Rückgabe aller verfügbaren Autos in der DB
-     * @return Alle Autos in DB
+     * Rückgabe von Autos anhand Suchkriterien
+     * @return Alle gefundenen Autos
      */
     @GetMapping(produces = APPLICATION_JSON_VALUE)
-    Collection<Auto> get() {
-        final var autos = service.find();
-        log.debug("get: {}", autos);
+    @Operation(summary = "Suche mit Suchkriterien", tags = "Suchen")
+    @ApiResponse(responseCode = "200", description = "Collection von Autos gefunden")
+    @ApiResponse(responseCode = "404", description = "Kein Auto gefunden")
+    Collection<Auto> get(@RequestParam Map<String, String> suchkriterien) {
+        log.debug(STR."get: suchkriterien=\{suchkriterien}");
+        final var autos = service.find(suchkriterien);
+        log.debug(STR."get: \{autos}");
         return autos;
     }
-
 }

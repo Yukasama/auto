@@ -2,6 +2,10 @@ package com.acme.auto.entity;
 
 import com.fasterxml.jackson.annotation.JsonValue;
 
+import java.util.Objects;
+import java.util.Optional;
+import java.util.stream.Stream;
+
 /**
  * Enum für mögliche Marken eines Autos
  */
@@ -33,6 +37,17 @@ public enum Marke {
 
     Marke(final String value) {
         this.value = value;
+    }
+
+    /**
+     * Konvertierung von String zu Enum-Wert
+     * @param value String, welcher zu Enum-Wert konvertiert werden soll
+     * @return Erfolgreich gefundener Enum-Wert oder null
+     */
+    public static Optional<Marke> of(final String value) {
+        return Stream.of(values())
+            .filter(interesse -> Objects.equals(interesse.value, value))
+            .findFirst();
     }
 
     /**

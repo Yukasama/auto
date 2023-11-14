@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import com.acme.auto.repository.AutoRepository;
 import java.util.Collection;
+import java.util.Map;
 import java.util.UUID;
 
 /**
@@ -24,20 +25,32 @@ public class AutoReadService {
      * @throws NotFoundException Kein Auto mit ID wurde gefunden
      */
     public Auto findById(final UUID id) {
-        log.debug("findById: id={}", id);
+        log.debug(STR."findById: id=\{id}");
         final var auto = repo.findById(id)
             .orElseThrow(() -> new NotFoundException(id));
-        log.debug("findById: {}", auto);
+        log.debug(STR."findById: \{auto}");
         return auto;
     }
 
     /**
-     * Alle Autos in der Datenbank abfragen
-     * @return Alle Autos in der DB
+     * Autos anhand Suchkriterien abfragen
+     * @param suchkriterien Suchkriterien für Autos
+     * @return Alle Autos entsprechend den Suchkriterien
+     * @throws NotFoundException - Kein Auto entspricht Suchkriterien
      */
-    public Collection<Auto> find() {
-        final var autos = repo.findAll();
-        log.debug("find: {}", autos);
+    public Collection<Auto> find(final Map<String, String> suchkriterien) {
+        log.debug(STR."find: suchkriterien=\{suchkriterien}");
+
+        if(suchkriterien.isEmpty()) {
+            return repo.findAll();
+        }
+
+        final var autos = repo.find(suchkriterien);
+        if(autos.isEmpty()) {
+            throw new NotFoundException(suchkriterien);
+        }
+
+        log.debug(STR."find: \{autos}");
         return autos;
     }
 }

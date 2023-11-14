@@ -1,32 +1,19 @@
-/*
- * Copyright (C) 2022 - present Juergen Zimmermann, Hochschule Karlsruhe
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
 package com.acme.auto.rest;
 
+import com.acme.auto.service.ConstraintViolationsException;
 import com.acme.auto.service.NotFoundException;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.ProblemDetail;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
+import java.net.URI;
 import static org.springframework.http.HttpStatus.NOT_FOUND;
+import static org.springframework.http.HttpStatus.UNPROCESSABLE_ENTITY;
 
 /**
- * Handler für allgemeine Exceptions.
- *
- * @author <a href="mailto:Juergen.Zimmermann@h-ka.de">Jürgen Zimmermann</a>
+ * Handler für allgemeine Exceptions in allen Controllern.
  */
 @ControllerAdvice
 @Slf4j
@@ -35,5 +22,21 @@ class CommonExceptionHandler {
     @ResponseStatus(NOT_FOUND)
     void onNotFound(final NotFoundException ex) {
         log.debug("onNotFound: {}", ex.getMessage());
+    }
+
+    @ExceptionHandler
+    ProblemDetail onConstraintViolation(final ConstraintViolationsException ex, final HttpServletRequest request) {
+        log.debug(STR."onConstraintViolation: \{ex.getMessage()}");
+
+        final var violations = ex.getViolations().stream()
+            .map(violation -> STR."\{violation} \n")
+            .toList();
+        log.trace(STR."onConstraintViolation: violations=\{violations.toString()}");
+
+        final var problemDetail =
+            ProblemDetail.forStatusAndDetail(UNPROCESSABLE_ENTITY, violations.toString());
+        problemDetail.setType(URI.create("/problem/unprocessable"));
+        problemDetail.setInstance(URI.create(request.getRequestURL().toString()));
+        return problemDetail;
     }
 }

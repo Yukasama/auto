@@ -1,5 +1,6 @@
 package com.acme.auto.entity;
 
+import jakarta.validation.constraints.NotBlank;
 import lombok.Builder;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -29,6 +30,7 @@ public class Besitzer {
      * @param vorname Besitzer Vorname
      * @return Besitzer Vorname
      */
+    @NotBlank
     private String vorname;
 
     /**
@@ -36,5 +38,6 @@ public class Besitzer {
      * @param nachname Der Nachname.
      * @return Der Nachname.
      */
+    @NotBlank
     private String nachname;
 }

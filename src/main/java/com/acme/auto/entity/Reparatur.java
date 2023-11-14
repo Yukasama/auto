@@ -3,6 +3,9 @@ package com.acme.auto.entity;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.UUID;
+
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Past;
 import lombok.Builder;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -31,6 +34,7 @@ public class Reparatur {
      * @param beschreibung Reparatur Beschreibung
      * @return Reparatur Beschreibung
      */
+    @NotBlank
     private String beschreibung;
 
     /**
@@ -38,6 +42,7 @@ public class Reparatur {
      * @param datum Reparatur Datum
      * @return Reparatur Datum
      */
+    @Past
     private LocalDate datum;
 
     /**
