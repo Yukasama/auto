@@ -23,6 +23,9 @@ import static org.springframework.http.HttpStatus.UNPROCESSABLE_ENTITY;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static org.springframework.http.ResponseEntity.created;
 
+/**
+ * Controller für die Rückgabe von Autos der zuständig für POST-, PUT-Requests ist
+ */
 @Controller
 @RequestMapping("/rest")
 @RequiredArgsConstructor
@@ -42,7 +45,7 @@ public class AutoWriteController {
      */
     @PostMapping(consumes = APPLICATION_JSON_VALUE)
     ResponseEntity<Void> post(@RequestBody final AutoDTO autoDTO, final HttpServletRequest request) {
-        log.debug(STR."post: \{autoDTO}");
+        log.debug(STR."post: dto=\{autoDTO}");
         final var autoMap = mapper.toAuto(autoDTO);
         final var autoDB = service.create(autoMap);
         final var location =
@@ -60,7 +63,7 @@ public class AutoWriteController {
     @PutMapping(path = "{id:" + ID_PATTERN + "}", consumes = APPLICATION_JSON_VALUE)
     @ResponseStatus(NO_CONTENT)
     void put(@PathVariable final UUID id, @RequestBody final AutoDTO autoDTO) {
-        log.debug(STR."put: \{autoDTO} id=\{id}");
+        log.debug(STR."put: dto=\{autoDTO} id=\{id}");
         final var autoMap = mapper.toAuto(autoDTO);
         service.update(autoMap, id);
     }

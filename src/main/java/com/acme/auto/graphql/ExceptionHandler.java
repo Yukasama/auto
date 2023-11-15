@@ -13,17 +13,17 @@ import static org.springframework.graphql.execution.ErrorType.BAD_REQUEST;
 import static org.springframework.graphql.execution.ErrorType.NOT_FOUND;
 
 /**
- * ExceptionHandler für abgebildete Exceptions auf GraphQLError
+ * Abbildung von Exceptions auf GraphQLError
  */
 @ControllerAdvice
-public class ExceptionHandler {
+final class ExceptionHandler {
     @GraphQlExceptionHandler
     @SuppressWarnings("unused")
     GraphQLError onNotFound(final NotFoundException ex) {
         final var id = ex.getId();
         final var message = id == null
             ? STR."Kein Auto gefunden: suchkriterien=\{ex.getSuchkriterien()}"
-            :  STR."Kein Auto mit der ID \{ex.getId()} gefunden";
+            : STR."Kein Auto mit der ID \{id} gefunden";
 
         return GraphQLError.newError()
             .errorType(NOT_FOUND)
@@ -33,7 +33,7 @@ public class ExceptionHandler {
 
     @GraphQlExceptionHandler
     @SuppressWarnings("unused")
-    Collection<GraphQLError> onConstraintViolation(final ConstraintViolationsException ex) {
+    Collection<GraphQLError> onConstraintViolations(final ConstraintViolationsException ex) {
         return ex.getViolations()
             .stream()
             .map(this::violationToGraphQLError)

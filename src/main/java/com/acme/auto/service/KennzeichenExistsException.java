@@ -3,12 +3,12 @@ package com.acme.auto.service;
 import lombok.Getter;
 
 /**
- * Exception falls es schon ein Auto mit demselben Namen und derselben Marke gibt
+ * Exception falls es schon ein Auto mit demselben Kennzeichen gibt
  */
 @Getter
 public class KennzeichenExistsException extends RuntimeException {
     /**
-     * Bereits vorhandenes Auto.
+     * Bereits vorhandenes Kennzeichen.
      */
     private final String kennzeichen;
 

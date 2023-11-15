@@ -8,12 +8,12 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.PositiveOrZero;
 import lombok.Builder;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
-import org.hibernate.validator.constraints.UniqueElements;
 
 /**
  * Daten eines Autos. In DDD ist Auto ist ein Aggregate Root.
@@ -58,6 +58,7 @@ public class Auto {
      * @param kennzeichen Kennzeichen des Autos
      * @return Kennzeichen des Autos
      */
+    @NotNull
     @Pattern(regexp = KENNZEICHEN_PATTERN)
     private String kennzeichen;
 
@@ -70,10 +71,11 @@ public class Auto {
     private int pferdeStaerke;
 
     /**
-     * Der Preis des Autos in €
+     * Der Preis des Autos
      * @param preis Autopreis
      * @return Autopreis
      */
+    @PositiveOrZero
     private BigDecimal preis;
 
     /**
@@ -92,6 +94,5 @@ public class Auto {
      */
     @Valid
     @ToString.Exclude
-    @UniqueElements
     private List<Reparatur> reparaturen;
 }

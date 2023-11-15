@@ -10,7 +10,7 @@ import java.util.Map;
 import java.util.UUID;
 
 /**
- * Geschäftslogik für Auto
+ * Geschäftslogik für das Lesen von Autos
  */
 @Service
 @RequiredArgsConstructor
@@ -22,7 +22,7 @@ public class AutoReadService {
      * Auto anhand der ID suchen
      * @param id Die ID des gesuchten Autos
      * @return Das gefundene Auto
-     * @throws NotFoundException Kein Auto mit ID wurde gefunden
+     * @throws NotFoundException Kein Auto mit der ID wurde gefunden
      */
     public Auto findById(final UUID id) {
         log.debug(STR."findById: id=\{id}");
@@ -36,7 +36,7 @@ public class AutoReadService {
      * Autos anhand Suchkriterien abfragen
      * @param suchkriterien Suchkriterien für Autos
      * @return Alle Autos entsprechend den Suchkriterien
-     * @throws NotFoundException - Kein Auto entspricht Suchkriterien
+     * @throws NotFoundException Kein Auto entspricht den Suchkriterien
      */
     public Collection<Auto> find(final Map<String, String> suchkriterien) {
         log.debug(STR."find: suchkriterien=\{suchkriterien}");

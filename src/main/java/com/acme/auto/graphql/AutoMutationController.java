@@ -9,12 +9,12 @@ import org.springframework.graphql.data.method.annotation.Argument;
 import org.springframework.graphql.data.method.annotation.GraphQlExceptionHandler;
 import org.springframework.graphql.data.method.annotation.MutationMapping;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.RequestMapping;
-
 import static org.springframework.graphql.execution.ErrorType.BAD_REQUEST;
 
+/**
+ * Controller für die Rückgabe von Autos der zuständig für GraphQL Mutations ist
+ */
 @Controller
-@RequestMapping("/graphql")
 @RequiredArgsConstructor
 @Slf4j
 public class AutoMutationController {

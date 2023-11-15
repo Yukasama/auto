@@ -11,21 +11,15 @@ import java.util.List;
  * @param kennzeichen Gültiges Kennzeichen des Autos, d.h. mit passendem Muster
  * @param pferdeStaerke Pferdestärke des Autos
  * @param preis Preis des Autos
- * @param besitzer Besitzer des Autos
- * @param reparaturen Reparaturen des Autos
+ * @param besitzer Besitzer des Autos als DTO
+ * @param reparaturen Reparaturen des Autos als DTO
  */
 record AutoDTO (
     String name,
-
     Marke marke,
-
     String kennzeichen,
-
     int pferdeStaerke,
-
     BigDecimal preis,
-
     BesitzerDTO besitzer,
-
     List<ReparaturDTO> reparaturen
 ) {}

@@ -8,6 +8,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import java.util.UUID;
 
+/**
+ * Geschäftslogik für das Neuanlegen und Ändern von Autos
+ */
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -24,7 +27,7 @@ public class AutoWriteService {
      * @throws KennzeichenExistsException Es gibt bereits ein Auto mit diesem Kennzeichen.
      */
     public Auto create(final Auto auto) {
-        log.debug(STR."create: \{auto}");
+        log.debug(STR."create: auto=\{auto}");
 
         final var violations = validator.validate(auto);
         if(!violations.isEmpty()) {
@@ -52,7 +55,7 @@ public class AutoWriteService {
      * @throws KennzeichenExistsException Es gibt bereits ein Auto mit diesem Kennzeichen.
      */
     public void update(final Auto auto, final UUID id) {
-        log.debug(STR."update: \{auto} id=\{id}");
+        log.debug(STR."update: auto=\{auto} id=\{id}");
 
         final var violations = validator.validate(auto);
         if(!violations.isEmpty()) {
@@ -73,7 +76,7 @@ public class AutoWriteService {
         }
 
         auto.setId(id);
-        log.debug(STR."update: \{autoDB} -> \{auto}");
         repo.update(auto);
+        log.debug(STR."update: \{autoDB} -> \{auto}");
     }
 }

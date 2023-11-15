@@ -42,7 +42,7 @@ public class AutoRepository {
      * @return Autos nach Suchkriterien zurückgeben
      */
     public Collection<Auto> find(final Map<String, String> suchkriterien) {
-        log.debug("find: suchkriterien={}", suchkriterien);
+        log.debug(STR."find: suchkriterien=\{suchkriterien}");
 
         if(suchkriterien.isEmpty()) {
             return findAll();
@@ -85,7 +85,7 @@ public class AutoRepository {
         final var autos = AUTOS.stream()
             .filter(auto -> auto.getName().contains(name))
             .toList();
-        log.debug(STR."findbyName: autos=\{autos}");
+        log.debug(STR."findbyName: \{autos}");
         return autos;
     }
 
@@ -107,7 +107,7 @@ public class AutoRepository {
             .filter(auto -> auto.getMarke().equals(marke))
             .toList();
 
-        log.debug(STR."findByMarke: autos=\{autos}");
+        log.debug(STR."findByMarke: \{autos}");
         return autos;
     }
 
@@ -153,7 +153,7 @@ public class AutoRepository {
      * @return Neuangelegtes Auto mit generierter ID
      */
     public Auto create(final Auto auto) {
-        log.debug(STR."create: \{auto}");
+        log.debug(STR."create: input=\{auto}");
 
         auto.setId(randomUUID());
         auto.getBesitzer().setId(randomUUID());
@@ -170,7 +170,7 @@ public class AutoRepository {
      * @param auto Objekt mit neuen Daten
      */
     public void update(final Auto auto) {
-        log.debug(STR."update: \{auto}");
+        log.debug(STR."update: input=\{auto}");
 
         final OptionalInt index = IntStream
             .range(0, AUTOS.size())
@@ -181,6 +181,11 @@ public class AutoRepository {
         if(index.isEmpty()) {
             return;
         }
+
+        // Neue ID für untergeordnete Objekte
+        auto.getBesitzer().setId(randomUUID());
+        auto.getReparaturen()
+            .forEach(reparatur -> reparatur.setId(randomUUID()));
 
         AUTOS.set(index.getAsInt(), auto);
         log.debug(STR."update: \{auto}");

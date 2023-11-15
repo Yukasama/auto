@@ -7,16 +7,15 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.graphql.data.method.annotation.Argument;
 import org.springframework.graphql.data.method.annotation.QueryMapping;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.RequestMapping;
-
 import java.util.Collection;
 import java.util.Optional;
 import java.util.UUID;
-
 import static java.util.Collections.emptyMap;
 
+/**
+ * Controller für die Rückgabe von Autos der zuständig für GraphQL Queries ist
+ */
 @Controller
-@RequestMapping("/graphql")
 @RequiredArgsConstructor
 @Slf4j
 public class AutoQueryController {
@@ -29,7 +28,7 @@ public class AutoQueryController {
      */
     @QueryMapping
     Auto auto(@Argument final UUID id) {
-        log.debug(STR."auto: \{id}");
+        log.debug(STR."auto: id=\{id}");
         final var auto = service.findById(id);
         log.debug(STR."auto: \{auto}");
         return auto;
@@ -42,12 +41,11 @@ public class AutoQueryController {
      */
     @QueryMapping
     Collection<Auto> autos(@Argument final Optional<Suchkriterien> input) {
-        log.debug(STR."autos: \{input}");
+        log.debug(STR."autos: suchkriterien=\{input}");
         final var suchkriterien = input.map(Suchkriterien::toMap)
             .orElse(emptyMap());
         final var autos = service.find(suchkriterien);
         log.debug(STR."autos: \{autos}");
         return autos;
     }
-
 }

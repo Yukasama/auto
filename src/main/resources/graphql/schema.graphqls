@@ -12,28 +12,32 @@ type Query {
   autos(input: Suchkriterien): [Auto!]
 }
 
+"Neuanlegen und Ändern von Autodaten"
 type Mutation {
   "Ein neues Auto anlegen"
   create(input: AutoInput!): CreatePayload
 }
 
+"Schema eines Autos"
 type Auto {
   id: ID
   name: String!
   marke: String!
-  kennzeichen: String
-  pferdeStaerke: Int
+  kennzeichen: String!
+  pferdeStaerke: Int!
   preis: String!
-  besitzer: Besitzer
+  besitzer: Besitzer!
   reparaturen(first: Int!): [Reparatur!]
 }
 
+"Schema eines Besitzers eines Autos"
 type Besitzer {
   id: ID
   vorname: String!
   nachname: String!
 }
 
+"Schema einer Reparatur eines Autos"
 type Reparatur {
   id: ID
   beschreibung: String!
@@ -41,34 +45,39 @@ type Reparatur {
   kosten: String!
 }
 
+"Suchkriterien für das Filtern von Autos"
 input Suchkriterien {
   name: String
-  kennzeichen: String
+  marke: String
+  reparatur: String
 }
 
+"Inputdaten für ein neues Auto"
 input AutoInput {
   name: String!
   marke: Marke!
-  kennzeichen: String
-  pferdeStaerke: Int
+  kennzeichen: String!
+  pferdeStaerke: Int!
   preis: String!
-  besitzer: Besitzer
-  reparaturen: [Reparatur!]
+  besitzer: BesitzerInput!
+  reparaturen: [ReparaturInput!]
 }
 
 "Enum für Marke eines Autos"
 enum Marke {
-  VW
-  M
-  F
-  T
+  VOLKSWAGEN
+  MERCEDES
+  FORD
+  TESLA
 }
 
+"Inputdaten für einen neuen Besitzer"
 input BesitzerInput {
   vorname: String!
   nachname: String!
 }
 
+"Inputdaten für eine neue Reparatur"
 input ReparaturInput {
   beschreibung: String!
   datum: String!
@@ -77,6 +86,5 @@ input ReparaturInput {
 
 "Rückgabetyp beim Neuanlegen eines Autos"
 type CreatePayload {
-  "ID des neu angelegten Autos"
   id: String!
 }

@@ -1,7 +1,6 @@
 package com.acme.auto.entity;
 
 import com.fasterxml.jackson.annotation.JsonValue;
-
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -46,7 +45,7 @@ public enum Marke {
      */
     public static Optional<Marke> of(final String value) {
         return Stream.of(values())
-            .filter(interesse -> Objects.equals(interesse.value, value))
+            .filter(marke -> Objects.equals(marke.value, value))
             .findFirst();
     }
 

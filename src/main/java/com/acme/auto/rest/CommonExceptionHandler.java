@@ -13,7 +13,7 @@ import static org.springframework.http.HttpStatus.NOT_FOUND;
 import static org.springframework.http.HttpStatus.UNPROCESSABLE_ENTITY;
 
 /**
- * Handler für allgemeine Exceptions in allen Controllern.
+ * Handler für allgemeine Exceptions in allen REST-Controllern.
  */
 @ControllerAdvice
 @Slf4j
@@ -25,7 +25,7 @@ class CommonExceptionHandler {
     }
 
     @ExceptionHandler
-    ProblemDetail onConstraintViolation(final ConstraintViolationsException ex, final HttpServletRequest request) {
+    ProblemDetail onConstraintViolations(final ConstraintViolationsException ex, final HttpServletRequest request) {
         log.debug(STR."onConstraintViolation: \{ex.getMessage()}");
 
         final var violations = ex.getViolations().stream()
