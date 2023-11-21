@@ -3,6 +3,8 @@ package com.acme.auto.rest;
 import com.acme.auto.service.AutoWriteService;
 import com.acme.auto.service.ConstraintViolationsException;
 import com.acme.auto.service.KennzeichenExistsException;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -40,11 +42,15 @@ public class AutoWriteController {
      *
      * @param autoDTO Das Autoobjekt aus dem eingegangenen Request-Body.
      * @param request Das Request-Objekt, um `Location` im Response-Header zu erstellen.
-     * @return Response mit Statuscode 201 einschließlich Location-Header oder Statuscode 422 falls Constraints verletzt
-     *      sind oder das Kennzeichen bereits existiert oder Statuscode 400 falls syntaktische Fehler im Request-Body
+     * @return Response mit Statuscode 201 einschließlich Location-Header oder Statuscode 422, falls Constraints verletzt
+     *      sind oder das Kennzeichen bereits existiert oder Statuscode 400, falls syntaktische Fehler im Request-Body
      *      vorliegen.
      */
     @PostMapping(consumes = APPLICATION_JSON_VALUE)
+    @Operation(summary = "Neues Auto neuanlegen", tags = "Neuanlegen")
+    @ApiResponse(responseCode = "201", description = "Auto neu angelegt")
+    @ApiResponse(responseCode = "400", description = "Syntax der Request fehlerhaft")
+    @ApiResponse(responseCode = "422", description = "Ungültige Werte oder Kennzeichen vorhanden")
     ResponseEntity<Void> post(@RequestBody final AutoDTO autoDTO, final HttpServletRequest request) {
         log.debug("post: dto={}", autoDTO);
         final var autoMap = mapper.toAuto(autoDTO);
@@ -63,6 +69,11 @@ public class AutoWriteController {
     @SuppressWarnings("StringTemplateMigration")
     @PutMapping(path = "{id:" + ID_PATTERN + "}", consumes = APPLICATION_JSON_VALUE)
     @ResponseStatus(NO_CONTENT)
+    @Operation(summary = "Vorhandenes Auto vollständig aktualisieren", tags = "Aktualisieren")
+    @ApiResponse(responseCode = "204", description = "Auto aktualisiert")
+    @ApiResponse(responseCode = "400", description = "Syntax der Request fehlerhaft")
+    @ApiResponse(responseCode = "404", description = "Auto nicht gefunden")
+    @ApiResponse(responseCode = "422", description = "Ungültige Werte oder Kennzeichen vorhanden")
     void put(@PathVariable final UUID id, @RequestBody final AutoDTO autoDTO) {
         log.debug("put: dto={} id={}", autoDTO, id);
         final var autoMap = mapper.toAuto(autoDTO);

@@ -2,6 +2,8 @@ package com.acme.auto.rest;
 
 import com.acme.auto.entity.Auto;
 import com.acme.auto.service.AutoReadService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -38,6 +40,9 @@ public class AutoGetController {
      */
     @SuppressWarnings("StringTemplateMigration")
     @GetMapping(path = "{id:" + ID_PATTERN + "}", produces = APPLICATION_JSON_VALUE)
+    @Operation(summary = "Suche nach Auto anhand ID", tags = "Suchen")
+    @ApiResponse(responseCode = "200", description = "Auto gefunden")
+    @ApiResponse(responseCode = "404", description = "Auto nicht gefunden")
     Auto getById(@PathVariable final UUID id) {
         log.debug("getById: id={}", id);
         final var auto = service.findById(id);
@@ -51,6 +56,9 @@ public class AutoGetController {
      * @return Alle gefundenen Autos
      */
     @GetMapping(produces = APPLICATION_JSON_VALUE)
+    @Operation(summary = "Suche nach Auto anhand Suchkriterien", tags = "Suchen")
+    @ApiResponse(responseCode = "200", description = "Auto gefunden")
+    @ApiResponse(responseCode = "404", description = "Auto nicht gefunden")
     Collection<Auto> get(@RequestParam Map<String, String> suchkriterien) {
         log.debug("get: suchkriterien={}", suchkriterien);
         final var autos = service.find(suchkriterien);
