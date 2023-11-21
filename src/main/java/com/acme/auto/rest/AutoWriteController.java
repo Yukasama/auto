@@ -1,6 +1,7 @@
 package com.acme.auto.rest;
 
 import com.acme.auto.service.AutoWriteService;
+import com.acme.auto.service.ConstraintViolationsException;
 import com.acme.auto.service.KennzeichenExistsException;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
@@ -45,7 +46,7 @@ public class AutoWriteController {
      */
     @PostMapping(consumes = APPLICATION_JSON_VALUE)
     ResponseEntity<Void> post(@RequestBody final AutoDTO autoDTO, final HttpServletRequest request) {
-        log.debug(STR."post: dto=\{autoDTO}");
+        log.debug("post: dto={}", autoDTO);
         final var autoMap = mapper.toAuto(autoDTO);
         final var autoDB = service.create(autoMap);
         final var location =
@@ -63,16 +64,32 @@ public class AutoWriteController {
     @PutMapping(path = "{id:" + ID_PATTERN + "}", consumes = APPLICATION_JSON_VALUE)
     @ResponseStatus(NO_CONTENT)
     void put(@PathVariable final UUID id, @RequestBody final AutoDTO autoDTO) {
-        log.debug(STR."put: dto=\{autoDTO} id=\{id}");
+        log.debug("put: dto={} id={}", autoDTO, id);
         final var autoMap = mapper.toAuto(autoDTO);
         service.update(autoMap, id);
     }
 
     @ExceptionHandler
     ProblemDetail onKennzeichenExists(final KennzeichenExistsException ex, final HttpServletRequest request) {
-        log.debug(STR."onKennzeichenExists: \{ex.getMessage()}");
+        log.debug("onKennzeichenExists: {}", ex.getMessage());
         final var problemDetail =
             ProblemDetail.forStatusAndDetail(UNPROCESSABLE_ENTITY, ex.getMessage());
+        problemDetail.setType(URI.create("/problem/unprocessable"));
+        problemDetail.setInstance(URI.create(request.getRequestURL().toString()));
+        return problemDetail;
+    }
+
+    @ExceptionHandler
+    ProblemDetail onConstraintViolations(final ConstraintViolationsException ex, final HttpServletRequest request) {
+        log.debug("onConstraintViolation: {}", ex.getMessage());
+
+        final var violations = ex.getViolations().stream()
+            .map(violation -> STR."\{violation} \n")
+            .toList();
+        log.trace("onConstraintViolation: violations={}", violations);
+
+        final var problemDetail =
+            ProblemDetail.forStatusAndDetail(UNPROCESSABLE_ENTITY, violations.toString());
         problemDetail.setType(URI.create("/problem/unprocessable"));
         problemDetail.setInstance(URI.create(request.getRequestURL().toString()));
         return problemDetail;

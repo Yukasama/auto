@@ -52,6 +52,5 @@ public class Reparatur {
      * @param kosten Reparaturkosten
      * @return Reparaturkosten
      */
-    @PositiveOrZero
     private BigDecimal kosten;
 }

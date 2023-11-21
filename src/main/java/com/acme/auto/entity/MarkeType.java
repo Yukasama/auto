@@ -8,7 +8,7 @@ import java.util.stream.Stream;
 /**
  * Enum für mögliche Marken eines Autos
  */
-public enum Marke {
+public enum MarkeType {
     /**
      * _Volkswagen_ mit dem internen Wert `VW` für z.B. das Mapping in einem JSON-Datensatz oder
      * das Abspeichern in einer DB.
@@ -34,7 +34,7 @@ public enum Marke {
 
     private final String value;
 
-    Marke(final String value) {
+    MarkeType(final String value) {
         this.value = value;
     }
 
@@ -43,7 +43,7 @@ public enum Marke {
      * @param value String, welcher zu Enum-Wert konvertiert werden soll
      * @return Erfolgreich gefundener Enum-Wert oder null
      */
-    public static Optional<Marke> of(final String value) {
+    public static Optional<MarkeType> of(final String value) {
         return Stream.of(values())
             .filter(marke -> Objects.equals(marke.value, value))
             .findFirst();

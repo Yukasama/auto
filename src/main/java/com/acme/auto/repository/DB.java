@@ -2,7 +2,7 @@ package com.acme.auto.repository;
 
 import com.acme.auto.entity.Auto;
 import com.acme.auto.entity.Besitzer;
-import com.acme.auto.entity.Marke;
+import com.acme.auto.entity.MarkeType;
 import com.acme.auto.entity.Reparatur;
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -28,7 +28,7 @@ final class DB {
             Auto.builder()
                 .id(UUID.fromString("00000000-0000-0000-0000-000000000000"))
                 .name("VW Polo")
-                .marke(Marke.VOLKSWAGEN)
+                .marke(MarkeType.VOLKSWAGEN)
                 .kennzeichen("B-MX-345")
                 .pferdeStaerke(130)
                 .preis(new BigDecimal(10000))
@@ -42,7 +42,7 @@ final class DB {
             Auto.builder()
                 .id(UUID.fromString("00000000-0000-0000-0000-000000000001"))
                 .name("Ford Mustang")
-                .marke(Marke.FORD)
+                .marke(MarkeType.FORD)
                 .kennzeichen("M-AB-2849")
                 .pferdeStaerke(150)
                 .preis(new BigDecimal(20000))
@@ -61,7 +61,7 @@ final class DB {
             Auto.builder()
                 .id(UUID.fromString("00000000-0000-0000-0000-000000000002"))
                 .name("Tesla Model Y")
-                .marke(Marke.TESLA)
+                .marke(MarkeType.TESLA)
                 .kennzeichen("KA-IT-947E")
                 .pferdeStaerke(160)
                 .preis(new BigDecimal(50000))
@@ -80,7 +80,7 @@ final class DB {
             Auto.builder()
                 .id(UUID.fromString("00000000-0000-0000-0000-000000000003"))
                 .name("Mercedes C-Klasse")
-                .marke(Marke.MERCEDES)
+                .marke(MarkeType.MERCEDES)
                 .kennzeichen("KA-ET-6928")
                 .pferdeStaerke(155)
                 .preis(new BigDecimal(30000))

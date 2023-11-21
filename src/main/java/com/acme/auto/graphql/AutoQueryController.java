@@ -26,11 +26,11 @@ public class AutoQueryController {
      * @param id ID des gesuchten Autos
      * @return Auto mit passender ID
      */
-    @QueryMapping
-    Auto auto(@Argument final UUID id) {
-        log.debug(STR."auto: id=\{id}");
+    @QueryMapping("auto")
+    Auto findById(@Argument final UUID id) {
+        log.debug("findById: id={}", id);
         final var auto = service.findById(id);
-        log.debug(STR."auto: \{auto}");
+        log.debug("findById: {}", auto);
         return auto;
     }
 
@@ -39,13 +39,13 @@ public class AutoQueryController {
      * @param input Suchkriterien für das Filtern von Autos
      * @return Alle gefundenen Autos
      */
-    @QueryMapping
-    Collection<Auto> autos(@Argument final Optional<Suchkriterien> input) {
-        log.debug(STR."autos: suchkriterien=\{input}");
+    @QueryMapping("autos")
+    Collection<Auto> find(@Argument final Optional<Suchkriterien> input) {
+        log.debug("find: suchkriterien={}", input);
         final var suchkriterien = input.map(Suchkriterien::toMap)
             .orElse(emptyMap());
         final var autos = service.find(suchkriterien);
-        log.debug(STR."autos: \{autos}");
+        log.debug("find: {}", autos);
         return autos;
     }
 }

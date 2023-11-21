@@ -1,7 +1,7 @@
 package com.acme.auto.repository;
 
 import com.acme.auto.entity.Auto;
-import com.acme.auto.entity.Marke;
+import com.acme.auto.entity.MarkeType;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
 import static com.acme.auto.repository.DB.AUTOS;
@@ -28,11 +28,11 @@ public class AutoRepository {
      * @return Optionales Auto mit ID oder leeres Optional
      */
     public Optional<Auto> findById(final UUID id) {
-        log.debug(STR."findById: id=\{id}");
+        log.debug("findById: id={}", id);
         final var autoOpt = AUTOS.stream()
             .filter(auto -> Objects.equals(auto.getId(), id))
             .findFirst();
-        log.debug(STR."findById: \{autoOpt}");
+        log.debug("findById: {}", autoOpt);
         return autoOpt;
     }
 
@@ -42,7 +42,7 @@ public class AutoRepository {
      * @return Autos nach Suchkriterien zurückgeben
      */
     public Collection<Auto> find(final Map<String, String> suchkriterien) {
-        log.debug(STR."find: suchkriterien=\{suchkriterien}");
+        log.debug("find: suchkriterien={}", suchkriterien);
 
         if(suchkriterien.isEmpty()) {
             return findAll();
@@ -60,7 +60,7 @@ public class AutoRepository {
                     return findByReparatur(entry.getValue());
                 }
                 default -> {
-                    log.debug(STR."find: ungueltiges Suchkriterium=\{entry.getKey()}");
+                    log.debug("find: ungueltiges Suchkriterium={}", entry.getKey());
                     return emptyList();
                 }
             }
@@ -81,11 +81,11 @@ public class AutoRepository {
      * @return Alle gefundenen Autos
      */
     public Collection<Auto> findByName(final String name) {
-        log.debug(STR."findByName: name=\{name}");
+        log.debug("findByName: name={}", name);
         final var autos = AUTOS.stream()
             .filter(auto -> auto.getName().contains(name))
             .toList();
-        log.debug(STR."findbyName: \{autos}");
+        log.debug("findbyName: {}", autos);
         return autos;
     }
 
@@ -95,9 +95,9 @@ public class AutoRepository {
      * @return Alle gefundenen Autos
      */
     public Collection<Auto> findByMarke(final String markeStr) {
-        log.debug(STR."findByMarke: marke=\{markeStr}");
+        log.debug("findByMarke: marke={}", markeStr);
 
-        final var marke = Marke.of(markeStr).orElse(null);
+        final var marke = MarkeType.of(markeStr).orElse(null);
         if(marke == null) {
             log.debug("findByMarke: Keine Autos gefunden.");
             return emptyList();
@@ -107,7 +107,7 @@ public class AutoRepository {
             .filter(auto -> auto.getMarke().equals(marke))
             .toList();
 
-        log.debug(STR."findByMarke: \{autos}");
+        log.debug("findByMarke: {}", autos);
         return autos;
     }
 
@@ -117,7 +117,7 @@ public class AutoRepository {
      * @return Alle gefundenen Autos
      */
     public Collection<Auto> findByReparatur(final String beschreibung) {
-        log.debug(STR."findByReparatur: beschreibung=\{beschreibung}");
+        log.debug("findByReparatur: beschreibung={}", beschreibung);
 
         final var autos = AUTOS.stream()
             .filter(auto -> auto.getReparaturen() != null &&
@@ -127,7 +127,7 @@ public class AutoRepository {
                     .equalsIgnoreCase(beschreibung)))
             .toList();
 
-        log.debug(STR."findByReparatur: \{autos}");
+        log.debug("findByReparatur: {}", autos);
         return autos;
     }
 
@@ -137,13 +137,13 @@ public class AutoRepository {
      * @return Existiert das Kennzeichen?
      */
     public boolean isKennzeichenExisting(final String kennzeichen) {
-        log.debug(STR."existiertKennzeichen: \{kennzeichen}");
+        log.debug("existiertKennzeichen: {}", kennzeichen);
 
         final var count = AUTOS.stream()
             .filter(a -> a.getKennzeichen().equals(kennzeichen))
             .count();
 
-        log.debug(STR."existiertKennzeichen: count=\{count}");
+        log.debug("existiertKennzeichen: count={}", count);
         return count > 0L;
     }
 
@@ -153,7 +153,7 @@ public class AutoRepository {
      * @return Neuangelegtes Auto mit generierter ID
      */
     public Auto create(final Auto auto) {
-        log.debug(STR."create: input=\{auto}");
+        log.debug("create: input={}", auto);
 
         auto.setId(randomUUID());
         auto.getBesitzer().setId(randomUUID());
@@ -161,7 +161,7 @@ public class AutoRepository {
             .forEach(reparatur -> reparatur.setId(randomUUID()));
 
         AUTOS.add(auto);
-        log.debug(STR."create: \{auto}");
+        log.debug("create: {}", auto);
         return auto;
     }
 
@@ -170,13 +170,13 @@ public class AutoRepository {
      * @param auto Objekt mit neuen Daten
      */
     public void update(final Auto auto) {
-        log.debug(STR."update: input=\{auto}");
+        log.debug("update: input={}", auto);
 
         final OptionalInt index = IntStream
             .range(0, AUTOS.size())
             .filter(a -> AUTOS.get(a).getId().equals(auto.getId()))
             .findFirst();
-        log.trace(STR."update: index=\{index}");
+        log.trace("update: index={}", index);
 
         if(index.isEmpty()) {
             return;
@@ -188,6 +188,6 @@ public class AutoRepository {
             .forEach(reparatur -> reparatur.setId(randomUUID()));
 
         AUTOS.set(index.getAsInt(), auto);
-        log.debug(STR."update: \{auto}");
+        log.debug("update: {}", auto);
     }
 }

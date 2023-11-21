@@ -39,9 +39,9 @@ public class AutoGetController {
     @SuppressWarnings("StringTemplateMigration")
     @GetMapping(path = "{id:" + ID_PATTERN + "}", produces = APPLICATION_JSON_VALUE)
     Auto getById(@PathVariable final UUID id) {
-        log.debug(STR."getById: id=\{id}");
+        log.debug("getById: id={}", id);
         final var auto = service.findById(id);
-        log.debug(STR."getById: \{auto}");
+        log.debug("getById: {}", auto);
         return auto;
     }
 
@@ -52,9 +52,9 @@ public class AutoGetController {
      */
     @GetMapping(produces = APPLICATION_JSON_VALUE)
     Collection<Auto> get(@RequestParam Map<String, String> suchkriterien) {
-        log.debug(STR."get: suchkriterien=\{suchkriterien}");
+        log.debug("get: suchkriterien={}", suchkriterien);
         final var autos = service.find(suchkriterien);
-        log.debug(STR."get: \{autos}");
+        log.debug("get: {}", autos);
         return autos;
     }
 }

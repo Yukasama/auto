@@ -3,16 +3,16 @@ schema {
   mutation: Mutation
 }
 
-"Suche nach Autodaten"
+"Suche nach Autos"
 type Query {
-  "Suche Autodaten anhand der ID"
+  "Suche Auto anhand der ID"
   auto(id: ID!): Auto
 
-  "Suche Autodaten anhand Suchkriterien"
+  "Suche Auto anhand Suchkriterien"
   autos(input: Suchkriterien): [Auto!]
 }
 
-"Neuanlegen und Ändern von Autodaten"
+"Neuanlegen und Ändern von Autos"
 type Mutation {
   "Ein neues Auto anlegen"
   create(input: AutoInput!): CreatePayload
@@ -52,10 +52,10 @@ input Suchkriterien {
   reparatur: String
 }
 
-"Inputdaten für ein neues Auto"
+"Input für ein Auto"
 input AutoInput {
   name: String!
-  marke: Marke!
+  marke: MarkeType!
   kennzeichen: String!
   pferdeStaerke: Int!
   preis: String!
@@ -64,20 +64,20 @@ input AutoInput {
 }
 
 "Enum für Marke eines Autos"
-enum Marke {
+enum MarkeType {
   VOLKSWAGEN
   MERCEDES
   FORD
   TESLA
 }
 
-"Inputdaten für einen neuen Besitzer"
+"Input für einen Besitzer eines Autos"
 input BesitzerInput {
   vorname: String!
   nachname: String!
 }
 
-"Inputdaten für eine neue Reparatur"
+"Input für eine Reparatur eines Autos"
 input ReparaturInput {
   beschreibung: String!
   datum: String!

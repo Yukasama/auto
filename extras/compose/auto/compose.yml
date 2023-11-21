@@ -43,6 +43,14 @@ services:
         target: /workspace/BOOT-INF/classes/application.yml
         read_only: true
       - type: bind
+        source: ..\..\..\src\main\resources\private-key.pem
+        target: /workspace/BOOT-INF/classes/private-key.pem
+        read_only: true
+      - type: bind
+        source: ..\..\..\src\main\resources\certificate.crt
+        target: /workspace/BOOT-INF/classes/certificate.crt
+        read_only: true
+      - type: bind
         source: C:\Zimmermann\volumes\auto
         target: /tmp
     env_file: auto.env

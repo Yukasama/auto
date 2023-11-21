@@ -81,7 +81,7 @@
 //
 //  14) Initialisierung des Gradle Wrappers in der richtigen Version
 //      dazu ist ggf. eine Internetverbindung erforderlich
-//        gradle wrapper --gradle-version=8.5-rc-1 --distribution-type=bin
+//        gradle wrapper --gradle-version=8.5-rc-3 --distribution-type=bin
 
 // https://github.com/gradle/kotlin-dsl/tree/master/samples
 // https://docs.gradle.org/current/userguide/kotlin_dsl.html
@@ -255,10 +255,10 @@ dependencies {
     implementation(platform("io.micrometer:micrometer-bom:${libs.versions.micrometer.get()}"))
     implementation(platform("com.fasterxml.jackson:jackson-bom:${libs.versions.jackson.get()}"))
     implementation(platform("io.netty:netty-bom:${libs.versions.netty.get()}"))
-    //implementation(platform("io.projectreactor:reactor-bom:${libs.versions.reactor.get()}"))
-    //implementation(platform("org.springframework:spring-framework-bom:${libs.versions.spring.get()}"))
-    //implementation(platform("org.springframework.data:spring-data-bom:${libs.versions.springData.get()}"))
-    //implementation(platform("org.springframework.security:spring-security-bom:${libs.versions.springSecurity.get()}"))
+    implementation(platform("io.projectreactor:reactor-bom:${libs.versions.reactor.get()}"))
+    implementation(platform("org.springframework:spring-framework-bom:${libs.versions.spring.get()}"))
+    implementation(platform("org.springframework.data:spring-data-bom:${libs.versions.springData.get()}"))
+    implementation(platform("org.springframework.security:spring-security-bom:${libs.versions.springSecurity.get()}"))
     implementation(platform("io.zipkin.reporter2:zipkin-reporter-bom:${libs.versions.zipkinReporter.get()}"))
 
     //testImplementation(platform("org.assertj:assertj-bom:${libs.versions.assertj.get()}"))
@@ -374,7 +374,7 @@ dependencies {
     constraints {
         implementation("org.jetbrains:annotations:${libs.versions.annotations.get()}")
         //implementation("org.springframework.graphql:spring-graphql:${libs.versions.springGraphQL.get()}")
-        //implementation("org.springframework.hateoas:spring-hateoas:${libs.versions.springHateoas.get()}")
+        implementation("org.springframework.hateoas:spring-hateoas:${libs.versions.springHateoas.get()}")
         //implementation("jakarta.persistence:jakarta.persistence-api:${libs.versions.jakartaPersistence.get()}")
         implementation("org.hibernate.orm:hibernate-core:${libs.versions.hibernate.get()}")
         //runtimeOnly("org.postgresql:postgresql:${libs.versions.postgres.get()}")
@@ -388,9 +388,9 @@ dependencies {
         implementation("com.zaxxer:HikariCP:${libs.versions.hikaricp.get()}")
         //implementation("org.hibernate.validator:hibernate-validator:${libs.versions.hibernateValidator.get()}")
         //compileOnly("org.projectlombok:lombok:${libs.versions.lombok.get()}")
-        //implementation("org.apache.tomcat.embed:tomcat-embed-core:${libs.versions.tomcat.get()}")
-        //implementation("org.apache.tomcat.embed:tomcat-embed-el:${libs.versions.tomcat.get()}")
-        //implementation("com.graphql-java:java-dataloader:${libs.versions.graphqlJavaDataloader.get()}")
+        implementation("org.apache.tomcat.embed:tomcat-embed-core:${libs.versions.tomcat.get()}")
+        implementation("org.apache.tomcat.embed:tomcat-embed-el:${libs.versions.tomcat.get()}")
+        implementation("com.graphql-java:java-dataloader:${libs.versions.graphqlJavaDataloader.get()}")
         implementation("com.graphql-java:graphql-java:${libs.versions.graphqlJava.get()}")
         //implementation("org.eclipse.angus:jakarta.mail:${libs.versions.angusMail.get()}")
         //implementation("org.yaml:snakeyaml:${libs.versions.snakeyaml.get()}")
@@ -461,16 +461,20 @@ tasks.named<JavaCompile>("compileTestJava") {
 }
 
 tasks.named("bootJar", org.springframework.boot.gradle.tasks.bundling.BootJar::class.java) {
+    // in src/main/resources/
+    exclude("private-key.pem", "certificate.cer")
+
     doLast {
         println(
             """
             |
             |Aufruf der ausfuehrbaren JAR-Datei:
             |
-            |java --enable-preview -jar build/libs/kunde-2023.10.0.jar --spring.profiles.active=dev `
-            |--spring.ssl.bundle.pem.microservice.keystore.private-key=./src/main/resources/private-key.pem `
-            |--spring.ssl.bundle.pem.microservice.keystore.certificate=./src/main/resources/certificate.crt `
-            |--spring.ssl.bundle.pem.microservice.truststore.certificate=./src/main/resources/certificate.crt [--debug]
+            |java --enable-preview -jar build/libs/kunde-2023.10.0.jar `
+            |     --spring.profiles.active=dev `
+            |     --spring.ssl.bundle.pem.microservice.keystore.private-key=./src/main/resources/private-key.pem `
+            |     --spring.ssl.bundle.pem.microservice.keystore.certificate=./src/main/resources/certificate.crt `
+            |     --spring.ssl.bundle.pem.microservice.truststore.certificate=./src/main/resources/certificate.crt [--debug]
             """.trimMargin("|")
         )
     }
@@ -824,7 +828,7 @@ tasks.named<Javadoc>("javadoc") {
             addStringOption("Xdoclint:none", "-quiet")
             // https://stackoverflow.com/questions/59485464/javadoc-and-enable-preview
             addBooleanOption("-enable-preview", true)
-            addStringOption("-release", javaVersion)
+            addStringOption("-release", libs.versions.javaLanguageVersion.get())
         }
 
         if (this is StandardJavadocDocletOptions) {
@@ -903,6 +907,7 @@ tasks.named("dependencyUpdates", com.github.benmanes.gradle.versions.updates.Dep
 
 idea {
     module {
+        isDownloadSources = true
         isDownloadJavadoc = true
         // https://stackoverflow.com/questions/59950657/querydsl-annotation-processor-and-gradle-plugin
         sourceDirs.add(file("generated/"))

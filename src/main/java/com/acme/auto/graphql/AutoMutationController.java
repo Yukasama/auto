@@ -1,14 +1,20 @@
 package com.acme.auto.graphql;
 
+import com.acme.auto.entity.Auto;
 import com.acme.auto.service.AutoWriteService;
+import com.acme.auto.service.ConstraintViolationsException;
 import com.acme.auto.service.KennzeichenExistsException;
 import graphql.GraphQLError;
+import jakarta.validation.ConstraintViolation;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.graphql.data.method.annotation.Argument;
 import org.springframework.graphql.data.method.annotation.GraphQlExceptionHandler;
 import org.springframework.graphql.data.method.annotation.MutationMapping;
 import org.springframework.stereotype.Controller;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.stream.Collectors;
 import static org.springframework.graphql.execution.ErrorType.BAD_REQUEST;
 
 /**
@@ -28,10 +34,10 @@ public class AutoMutationController {
      */
     @MutationMapping
     CreatePayload create(@Argument final AutoInput input) {
-        log.debug(STR."create: input=\{input}");
+        log.debug("create: input={}", input);
         final var autoMap = mapper.toAuto(input);
         final var id = service.create(autoMap).getId();
-        log.debug(STR."create: id=\{id}");
+        log.debug("create: id={}", id);
         return new CreatePayload(id);
     }
 
@@ -41,6 +47,24 @@ public class AutoMutationController {
         return GraphQLError.newError()
             .errorType(BAD_REQUEST)
             .message(ex.getMessage())
+            .path(Arrays.asList("input", "kennzeichen"))
+            .build();
+    }
+
+    @GraphQlExceptionHandler
+    @SuppressWarnings("unused")
+    Collection<GraphQLError> onConstraintViolations(final ConstraintViolationsException ex) {
+        return ex.getViolations()
+            .stream()
+            .map(this::violationToGraphQLError)
+            .collect(Collectors.toList());
+    }
+
+    private GraphQLError violationToGraphQLError(final ConstraintViolation<Auto> violation) {
+        return GraphQLError.newError()
+            .errorType(BAD_REQUEST)
+            .message(violation.getMessage())
+            .path(Arrays.asList("input", violation.getPropertyPath().toString()))
             .build();
     }
 }

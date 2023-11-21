@@ -27,11 +27,11 @@ public class AutoWriteService {
      * @throws KennzeichenExistsException Es gibt bereits ein Auto mit diesem Kennzeichen.
      */
     public Auto create(final Auto auto) {
-        log.debug(STR."create: auto=\{auto}");
+        log.debug("create: auto={}", auto);
 
         final var violations = validator.validate(auto);
         if(!violations.isEmpty()) {
-            log.debug(STR."create: violations=\{violations}");
+            log.debug("create: violations={}", violations);
             throw new ConstraintViolationsException(violations);
         }
 
@@ -41,7 +41,7 @@ public class AutoWriteService {
         }
 
         final var autoDB = repo.create(auto);
-        log.debug(STR."create: \{autoDB}");
+        log.debug("create: {}", autoDB);
         return autoDB;
     }
 
@@ -55,11 +55,11 @@ public class AutoWriteService {
      * @throws KennzeichenExistsException Es gibt bereits ein Auto mit diesem Kennzeichen.
      */
     public void update(final Auto auto, final UUID id) {
-        log.debug(STR."update: auto=\{auto} id=\{id}");
+        log.debug("update: auto={} id={}", auto, id);
 
         final var violations = validator.validate(auto);
         if(!violations.isEmpty()) {
-            log.debug(STR."update: violations=\{violations}");
+            log.debug("update: violations={}", violations);
             throw new ConstraintViolationsException(violations);
         }
 
@@ -71,12 +71,12 @@ public class AutoWriteService {
         final var kennzeichen = auto.getKennzeichen();
         final var autoDB = autoDBOpt.get();
         if(!autoDB.getKennzeichen().equals(kennzeichen) && repo.isKennzeichenExisting(kennzeichen)) {
-            log.debug(STR."update: Kennzeichen \{kennzeichen} existiert bereits");
+            log.debug("update: Kennzeichen {} existiert bereits.", kennzeichen);
             throw new KennzeichenExistsException(kennzeichen);
         }
 
         auto.setId(id);
         repo.update(auto);
-        log.debug(STR."update: \{autoDB} -> \{auto}");
+        log.debug("update: {} -> {}", autoDB, auto);
     }
 }

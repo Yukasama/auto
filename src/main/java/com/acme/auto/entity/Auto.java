@@ -27,7 +27,7 @@ public class Auto {
     /**
      * Muster für ein deutsches Kennzeichen
      */
-    public static final String KENNZEICHEN_PATTERN = "^[A-ZÄÖÜ]{1,3}-[A-Z]{1,2}-[1-9][0-9]{0,3}E?";
+    public static final String KENNZEICHEN_PATTERN = "^[A-ZÄÖÜ]{1,3}-[A-Z]{1,2}-[1-9]\\d{0,3}E?";
 
     /**
      * Die ID des Autos
@@ -51,7 +51,7 @@ public class Auto {
      * @return Automarke
      */
     @NotNull
-    private Marke marke;
+    private MarkeType marke;
 
     /**
      * Das Kennzeichen des Autos
@@ -75,7 +75,6 @@ public class Auto {
      * @param preis Autopreis
      * @return Autopreis
      */
-    @PositiveOrZero
     private BigDecimal preis;
 
     /**

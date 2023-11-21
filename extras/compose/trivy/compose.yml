@@ -18,7 +18,7 @@
 services:
   trivy:
     image: aquasec/trivy:0.45.1
-    command: [image, juergenzimmermann/kunde:2023.10.0-buildpacks]
+    command: [image, juergenzimmermann/auto:2023.10.0-buildpacks]
     volumes:
       - type: bind
         source: C:/Zimmermann/volumes/trivy

@@ -147,6 +147,12 @@ spec:
           volumeMounts:
             - mountPath: /tmp
               name: log-{{ include "auto.name" . }}{{ .Values.versionSuffix }}
+            - mountPath: /workspace/BOOT-INF/classes/private-key.pem
+              name: private-key-{{ include "auto.name" . }}
+              readOnly: true
+            - mountPath: /workspace/BOOT-INF/classes/certificate.crt
+              name: certificate-{{ include "auto.name" . }}
+              readOnly: true
       priorityClassName: medium-priority
       volumes:
         - name: log-{{ include "auto.name" . }}{{ .Values.versionSuffix }}
@@ -156,5 +162,13 @@ spec:
             type: Directory
           # https://kubernetes.io/docs/concepts/storage/volumes/#emptydir
           #emptyDir: {}
+        - name: private-key-{{ include "auto.name" . }}
+          hostPath:
+            path: /run/desktop/mnt/host/c/Users/Student/IdeaProjects/auto{{ .Values.versionSuffix }}/src/main/resources/private-key.pem
+            type: File
+        - name: certificate-{{ include "auto.name" . }}
+          hostPath:
+            path: /run/desktop/mnt/host/c/Users/Student/IdeaProjects/auto{{ .Values.versionSuffix }}/src/main/resources/certificate.crt
+            type: File
       serviceAccountName: {{ include "auto.fullname" . }}
       automountServiceAccountToken: false

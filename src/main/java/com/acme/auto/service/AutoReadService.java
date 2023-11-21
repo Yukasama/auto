@@ -25,10 +25,10 @@ public class AutoReadService {
      * @throws NotFoundException Kein Auto mit der ID wurde gefunden
      */
     public Auto findById(final UUID id) {
-        log.debug(STR."findById: id=\{id}");
+        log.debug("findById: id={}", id);
         final var auto = repo.findById(id)
             .orElseThrow(() -> new NotFoundException(id));
-        log.debug(STR."findById: \{auto}");
+        log.debug("findById: {}", auto);
         return auto;
     }
 
@@ -39,7 +39,7 @@ public class AutoReadService {
      * @throws NotFoundException Kein Auto entspricht den Suchkriterien
      */
     public Collection<Auto> find(final Map<String, String> suchkriterien) {
-        log.debug(STR."find: suchkriterien=\{suchkriterien}");
+        log.debug("find: suchkriterien={}", suchkriterien);
 
         if(suchkriterien.isEmpty()) {
             return repo.findAll();
@@ -50,7 +50,7 @@ public class AutoReadService {
             throw new NotFoundException(suchkriterien);
         }
 
-        log.debug(STR."find: \{autos}");
+        log.debug("find: {}", autos);
         return autos;
     }
 }

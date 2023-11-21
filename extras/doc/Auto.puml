@@ -1,0 +1,68 @@
+@startuml Auto
+
+skinparam classAttributeIconSize 0
+' skinparam monochrome true
+
+package java {
+    package util {
+        class UUID
+        interface List<T>
+    }
+
+    package math {
+        class BigDecimal
+    }
+
+    package time {
+        class LocalDate
+    }
+}
+
+package com.acme.auto.entity {
+  class Reparatur {
+    UUID id
+    String beschreibung
+    LocalDate datum
+    BigDecimal kosten
+  }
+
+  class Besitzer {
+    UUID id
+    String vorname
+    String nachname
+  }
+
+  class Auto <<entity>> {
+    UUID id
+    String name
+    Marke marke
+    String kennzeichen
+    int pferdeStaerke
+    BigDecimal preis
+    Besitzer besitzer
+    List<Reparatur> reparaturen
+  }
+
+  enum Marke {
+    VOLKSWAGEN
+    MERCEDES
+    FORD
+    TESLA
+  }
+
+  Auto *--> "1" Besitzer : besitzer
+  Auto *--> "0..*" Reparatur : reparaturen
+  Auto .up.> Marke
+
+  Auto ..> UUID
+  Auto ..> BigDecimal
+  Auto ..> List
+
+  Besitzer ..> UUID
+
+  Reparatur ..> UUID
+  Reparatur ..> LocalDate
+  Reparatur ..> BigDecimal
+}
+
+@enduml

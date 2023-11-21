@@ -1,6 +1,6 @@
 package com.acme.auto.graphql;
 
-import com.acme.auto.entity.Marke;
+import com.acme.auto.entity.MarkeType;
 import java.math.BigDecimal;
 import java.util.List;
 
@@ -16,7 +16,7 @@ import java.util.List;
  */
 record AutoInput (
     String name,
-    Marke marke,
+    MarkeType marke,
     String kennzeichen,
     int pferdeStaerke,
     BigDecimal preis,
