@@ -75,13 +75,13 @@
 //
 //  13) Native Compilation mit Spring AOT (= Ahead Of Time) in einer Eingabeaufforderung
 //        "C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\VC\Auxiliary\Build\vcvars64.bat"
-//        .\gradlew nativeCompile -Dflyway=false
+//        .\gradlew nativeCompile
 //        .\build\native\nativeCompile\kunde.exe --spring.profiles.active=dev --logging.file.name=.\build\log\application.log
 //        .\build\native\nativeCompile\kunde.exe --spring.datasource.url=jdbc:h2:mem:testdb --spring.datasource.username=sa --spring.datasource.password="" --logging.file.name=.\build\log\application.log
 //
 //  14) Initialisierung des Gradle Wrappers in der richtigen Version
 //      dazu ist ggf. eine Internetverbindung erforderlich
-//        gradle wrapper --gradle-version=8.5-rc-3 --distribution-type=bin
+//        gradle wrapper --gradle-version=8.5-rc-4 --distribution-type=bin
 
 // https://github.com/gradle/kotlin-dsl/tree/master/samples
 // https://docs.gradle.org/current/userguide/kotlin_dsl.html
@@ -252,18 +252,18 @@ repositories {
 @Suppress("CommentSpacing")
 // https://docs.gradle.org/current/userguide/java_library_plugin.html#sec:java_library_separation
 dependencies {
-    implementation(platform("io.micrometer:micrometer-bom:${libs.versions.micrometer.get()}"))
+    //implementation(platform("io.micrometer:micrometer-bom:${libs.versions.micrometer.get()}"))
     implementation(platform("com.fasterxml.jackson:jackson-bom:${libs.versions.jackson.get()}"))
-    implementation(platform("io.netty:netty-bom:${libs.versions.netty.get()}"))
-    implementation(platform("io.projectreactor:reactor-bom:${libs.versions.reactor.get()}"))
-    implementation(platform("org.springframework:spring-framework-bom:${libs.versions.spring.get()}"))
-    implementation(platform("org.springframework.data:spring-data-bom:${libs.versions.springData.get()}"))
-    implementation(platform("org.springframework.security:spring-security-bom:${libs.versions.springSecurity.get()}"))
+    //implementation(platform("io.netty:netty-bom:${libs.versions.netty.get()}"))
+    //implementation(platform("io.projectreactor:reactor-bom:${libs.versions.reactor.get()}"))
+    //implementation(platform("org.springframework:spring-framework-bom:${libs.versions.spring.get()}"))
+    //implementation(platform("org.springframework.data:spring-data-bom:${libs.versions.springData.get()}"))
+    //implementation(platform("org.springframework.security:spring-security-bom:${libs.versions.springSecurity.get()}"))
     implementation(platform("io.zipkin.reporter2:zipkin-reporter-bom:${libs.versions.zipkinReporter.get()}"))
 
     //testImplementation(platform("org.assertj:assertj-bom:${libs.versions.assertj.get()}"))
-    testImplementation(platform("org.mockito:mockito-bom:${libs.versions.mockito.get()}"))
-    testImplementation(platform("org.junit:junit-bom:${libs.versions.junit.get()}"))
+    //testImplementation(platform("org.mockito:mockito-bom:${libs.versions.mockito.get()}"))
+    //testImplementation(platform("org.junit:junit-bom:${libs.versions.junit.get()}"))
     testImplementation(platform("io.qameta.allure:allure-bom:${libs.versions.allureBom.get()}"))
 
     implementation(platform("org.springframework.boot:spring-boot-starter-parent:${libs.versions.springBoot.get()}"))
@@ -302,6 +302,11 @@ dependencies {
     // org.flywaydb.core.internal.database.DatabaseTypeRegister.getDatabaseTypeForConnection()
     if (useFlyway) {
         implementation("org.flywaydb:flyway-core")
+        // https://documentation.red-gate.com/flyway/learn-more-about-flyway/system-requirements/supported-databases-for-flyway
+        // https://documentation.red-gate.com/fd/postgresql-184127604.html
+        // https://github.com/flyway/flyway/blob/main/flyway-core/src/main/java/org/flywaydb/core/internal/database/DatabaseTypeRegister.java#L99
+        runtimeOnly("org.flywaydb:flyway-database-postgresql")
+        runtimeOnly("org.flywaydb:flyway-database-oracle")
         // https://flywaydb.org/documentation/database/mysql#java-usage
         runtimeOnly("org.flywaydb:flyway-mysql")
     }
@@ -374,24 +379,26 @@ dependencies {
     constraints {
         implementation("org.jetbrains:annotations:${libs.versions.annotations.get()}")
         //implementation("org.springframework.graphql:spring-graphql:${libs.versions.springGraphQL.get()}")
-        implementation("org.springframework.hateoas:spring-hateoas:${libs.versions.springHateoas.get()}")
+        //implementation("org.springframework.hateoas:spring-hateoas:${libs.versions.springHateoas.get()}")
         //implementation("jakarta.persistence:jakarta.persistence-api:${libs.versions.jakartaPersistence.get()}")
         implementation("org.hibernate.orm:hibernate-core:${libs.versions.hibernate.get()}")
-        //runtimeOnly("org.postgresql:postgresql:${libs.versions.postgres.get()}")
+        runtimeOnly("org.postgresql:postgresql:${libs.versions.postgres.get()}")
         runtimeOnly("com.mysql:mysql-connector-j:${libs.versions.mysql.get()}")
         //runtimeOnly("com.oracle.database.jdbc:ojdbc11:${libs.versions.oracle.get()}")
         //runtimeOnly("com.h2database:h2:${libs.versions.h2.get()}")
-        //if (useFlyway) {
-        //    implementation("org.flywaydb:flyway-core:${libs.versions.flyway.get()}")
-        //    runtimeOnly("org.flywaydb:flyway-mysql:${libs.versions.flyway.get()}")
-        //}
+        if (useFlyway) {
+            implementation("org.flywaydb:flyway-core:${libs.versions.flyway.get()}")
+            runtimeOnly("org.flywaydb:flyway-database-postgresql:${libs.versions.flyway.get()}")
+            runtimeOnly("org.flywaydb:flyway-database-oracle:${libs.versions.flyway.get()}")
+            runtimeOnly("org.flywaydb:flyway-mysql:${libs.versions.flyway.get()}")
+        }
         implementation("com.zaxxer:HikariCP:${libs.versions.hikaricp.get()}")
         //implementation("org.hibernate.validator:hibernate-validator:${libs.versions.hibernateValidator.get()}")
         //compileOnly("org.projectlombok:lombok:${libs.versions.lombok.get()}")
-        implementation("org.apache.tomcat.embed:tomcat-embed-core:${libs.versions.tomcat.get()}")
-        implementation("org.apache.tomcat.embed:tomcat-embed-el:${libs.versions.tomcat.get()}")
+        //implementation("org.apache.tomcat.embed:tomcat-embed-core:${libs.versions.tomcat.get()}")
+        //implementation("org.apache.tomcat.embed:tomcat-embed-el:${libs.versions.tomcat.get()}")
         implementation("com.graphql-java:java-dataloader:${libs.versions.graphqlJavaDataloader.get()}")
-        implementation("com.graphql-java:graphql-java:${libs.versions.graphqlJava.get()}")
+        //implementation("com.graphql-java:graphql-java:${libs.versions.graphqlJava.get()}")
         //implementation("org.eclipse.angus:jakarta.mail:${libs.versions.angusMail.get()}")
         //implementation("org.yaml:snakeyaml:${libs.versions.snakeyaml.get()}")
         //implementation("org.slf4j:slf4j-api:${libs.versions.slf4j.get()}")
@@ -399,7 +406,7 @@ dependencies {
         //implementation("ch.qos.logback:logback-classic:${libs.versions.logback.get()}")
         implementation("org.apache.logging.log4j:log4j-api:${libs.versions.log4j2.get()}")
         implementation("org.apache.logging.log4j:log4j-to-slf4j:${libs.versions.log4j2.get()}")
-        implementation("io.micrometer:micrometer-tracing-bridge-brave:${libs.versions.micrometerTracingBridgeBrave.get()}")
+        //implementation("io.micrometer:micrometer-tracing-bridge-brave:${libs.versions.micrometerTracingBridgeBrave.get()}")
         //implementation("org.springframework.security:spring-security-rsa:${libs.versions.springSecurityRsa.get()}")
 
         allureCommandline("io.qameta.allure:allure-commandline:${libs.versions.allureCommandline.get()}")
@@ -768,10 +775,22 @@ sonarqube {
 // cd C:\Z\caches\modules-2\files-2.1\com.h2database\h2\2.1.214\...
 // java -jar h2-2.1.214.jar
 //  Generic H2 (Embedded)
-//  JDBC URL:   jdbc:h2:tcp://localhost/C:/Zimmermann/owasp-dependency-check/odc
+//  JDBC URL:   jdbc:h2:tcp://localhost/C:/Zimmermann/dependency-check-data/odc
 dependencyCheck {
-    scanConfigurations = listOf("runtimeClasspath")
-    suppressionFile = "$projectDir/config/owasp/suppression.xml"
+    // https://github.com/dependency-check/dependency-check-gradle/blob/main/src/main/groovy/org/owasp/dependencycheck/gradle/extension/NvdExtension.groovy
+    // NVD = National Vulnerability Database
+    // NIST = National Institute of Standards and Technology
+    // https://nvd.nist.gov/developers/request-an-api-key
+    nvd(
+        closureOf<org.owasp.dependencycheck.gradle.extension.NvdExtension> {
+            apiKey = (project.properties["nvdApiKey"] as String?)  ?: ""
+            // default: 2000 Millisekunden Wartezeit zwischen den Aufrufen an das NVD API bei einem API-Key, sonst 8000
+            //delay = 5000
+            // default: max. 10 wiederholte Requests fuer einen Aufruf an das NVD API
+            //nvdMaxRetryCount = 20
+        }
+    )
+
     data(
         closureOf<org.owasp.dependencycheck.gradle.extension.DataExtension> {
             directory = "C:/Zimmermann/dependency-check-data"
@@ -781,33 +800,39 @@ dependencyCheck {
         },
     )
 
+    suppressionFile = "$projectDir/config/owasp/suppression.xml"
+    scanConfigurations = listOf("runtimeClasspath")
     analyzedTypes = listOf("jar")
+
     analyzers(
         closureOf<org.owasp.dependencycheck.gradle.extension.AnalyzerExtension> {
             // nicht benutzte Analyzer
+            archiveEnabled = false
             assemblyEnabled = false
             autoconfEnabled = false
             bundleAuditEnabled = false
             cmakeEnabled = false
             cocoapodsEnabled = false
             composerEnabled = false
+            cpanEnabled = false
+            dartEnabled = false
             golangDepEnabled = false
             golangModEnabled = false
-            nodeEnabled = false
+            msbuildEnabled = false
             nugetconfEnabled = false
             nuspecEnabled = false
             pyDistributionEnabled = false
             pyPackageEnabled = false
             rubygemsEnabled = false
             swiftEnabled = false
-
+            swiftPackageResolvedEnabled = false
+            nodePackage(closureOf<org.owasp.dependencycheck.gradle.extension.NodePackageExtension> { enabled = false })
             nodeAudit(closureOf<org.owasp.dependencycheck.gradle.extension.NodeAuditExtension> { enabled = false })
             retirejs(closureOf<org.owasp.dependencycheck.gradle.extension.RetireJSExtension> { enabled = false })
-            // ossIndex(closureOf<org.owasp.dependencycheck.gradle.extension.OssIndexExtension> { enabled = true })
         },
     )
 
-    format = org.owasp.dependencycheck.reporting.ReportGenerator.Format.HTML.toString()
+    // format = org.owasp.dependencycheck.reporting.ReportGenerator.Format.HTML.toString()
     // format = org.owasp.dependencycheck.reporting.ReportGenerator.Format.ALL.toString()
 }
 

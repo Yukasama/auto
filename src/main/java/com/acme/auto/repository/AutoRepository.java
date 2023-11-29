@@ -190,4 +190,11 @@ public class AutoRepository {
         AUTOS.set(index.getAsInt(), auto);
         log.debug("update: {}", auto);
     }
+
+    public void delete(final UUID id) {
+        log.debug("delete: id={}", id);
+        int priorSize = AUTOS.size();
+        AUTOS.removeIf(auto -> auto.getId().equals(id));
+        log.debug("delete: size=[{} -> {}]", priorSize, AUTOS.size());
+    }
 }

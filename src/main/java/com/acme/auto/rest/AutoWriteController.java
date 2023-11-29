@@ -11,6 +11,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -78,6 +79,17 @@ public class AutoWriteController {
         log.debug("put: dto={} id={}", autoDTO, id);
         final var autoMap = mapper.toAuto(autoDTO);
         service.update(autoMap, id);
+    }
+
+    @SuppressWarnings("StringTemplateMigration")
+    @DeleteMapping(path = "{id:" + ID_PATTERN + "}")
+    @ResponseStatus(NO_CONTENT)
+    @Operation(summary = "Vorhandenes Auto löschen", tags = "Löschen")
+    @ApiResponse(responseCode = "204", description = "Auto gelöscht")
+    @ApiResponse(responseCode = "404", description = "Auto nicht gefunden")
+    void delete(@PathVariable final UUID id) {
+        log.debug("delete: id={}", id);
+        service.delete(id);
     }
 
     @ExceptionHandler

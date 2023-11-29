@@ -79,4 +79,16 @@ public class AutoWriteService {
         repo.update(auto);
         log.debug("update: {} -> {}", autoDB, auto);
     }
+
+    public void delete(final UUID id) {
+        log.debug("delete: id={}", id);
+
+        final var autoDBOpt = repo.findById(id);
+        if(autoDBOpt.isEmpty()) {
+            throw new NotFoundException(id);
+        }
+
+        repo.delete(id);
+        log.debug("delete: {}", autoDBOpt);
+    }
 }

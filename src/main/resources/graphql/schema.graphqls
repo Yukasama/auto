@@ -27,7 +27,7 @@ type Auto {
   pferdeStaerke: Int!
   preis: String!
   besitzer: Besitzer!
-  reparaturen(first: Int!): [Reparatur!]
+  reparaturen: [Reparatur!]
 }
 
 "Schema eines Besitzers eines Autos"
