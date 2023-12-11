@@ -26,14 +26,14 @@ server:
   shutdown: graceful
 
 spring:
-  application.name: kunde
+  application.name: auto
   aop.proxy-target-class: false
   # https://github.com/spring-projects/spring-framework/commit/55b3b28aecdb914224e009c7e53c0d11f0d9cd05
   checkpoint.restore: onRefresh
   # https://docs.spring.io/spring-boot/docs/current/reference/html/application-properties.html#appendix.application-properties.data
   datasource:
-    url: jdbc:postgresql://postgres/kunde
-    username: kunde
+    url: jdbc:postgresql://postgres/auto
+    username: auto
     password: Change Me!
     # Fortio:
     #url: jdbc:h2:mem:testdb
@@ -59,7 +59,7 @@ spring:
       # https://docs.jboss.org/hibernate/orm/current/javadocs/org/hibernate/cfg/AvailableSettings.html
       # https://docs.jboss.org/hibernate/orm/current/javadocs/org/hibernate/cfg/Environment.html
       hibernate:
-        #default_schema: kunde
+        #default_schema: auto
         jdbc:
           time_zone: Europe/Berlin
           batch_versioned_data: true
@@ -128,7 +128,7 @@ info.app:
 management:
   endpoints.web.exposure.include: "*"
   #endpoint.shutdown.enabled: true
-  metrics.tags.application: kunde
+  metrics.tags.application: auto
   # Trace every action
   # https://springbootlearning.medium.com/using-micrometer-to-trace-your-spring-boot-app-1fe6ff9982ae
   tracing.sampling.probability: "1.0"
@@ -188,10 +188,10 @@ spring:
       minimum-idle: 1 # Default: maximumPoolSize
     # SWA: Einstellungen fuer PostgreSQL, MySQL und Oracle
     #password: p
-    #url: jdbc:postgresql://localhost/kunde
-    #url: jdbc:mysql://localhost/kunde
+    #url: jdbc:postgresql://localhost/auto
+    #url: jdbc:mysql://localhost/auto
     #url: jdbc:oracle:thin:@localhost/XEPDB1
-    #username: kunde
+    #username: auto
 
     # SWA: Einstellungen fuer H2
     password: ""

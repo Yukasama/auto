@@ -38,3 +38,18 @@
 * CREATE INDEX -> B+ Baum
 * Multithreading kein Problem, da Attriute final
 * Suche wird in LOKALER Variable gespeichert
+
+### Übung 10
+* Abgeleitet von AutoCloseable, dann kann in try() ein Argument automatisch schließen ohne finally
+
+### Tag 11
+* Postgres einrichten
+* Schema:
+Namespace
+  Betriebssystem / Dateisystem
+    Ordner = Verzeichnis = Directory
+  Java
+    package
+  DB-Systeme (außer MySQL)
+    Schema (NICHT: Unter-Schema)
+* Tabellen immer in eigenem Schema (nicht default)

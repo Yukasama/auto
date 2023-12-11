@@ -43,9 +43,9 @@ public class AutoWriteController {
      *
      * @param autoDTO Das Autoobjekt aus dem eingegangenen Request-Body.
      * @param request Das Request-Objekt, um `Location` im Response-Header zu erstellen.
-     * @return Response mit Statuscode 201 einschließlich Location-Header oder Statuscode 422, falls Constraints verletzt
-     *      sind oder das Kennzeichen bereits existiert oder Statuscode 400, falls syntaktische Fehler im Request-Body
-     *      vorliegen.
+     * @return Response mit Statuscode 201 einschließlich Location-Header oder Statuscode 422, falls Constraints
+     *      verletzt sind oder das Kennzeichen bereits existiert oder Statuscode 400, falls syntaktische Fehler
+     *      im Request-Body vorliegen.
      */
     @PostMapping(consumes = APPLICATION_JSON_VALUE)
     @Operation(summary = "Neues Auto neuanlegen", tags = "Neuanlegen")

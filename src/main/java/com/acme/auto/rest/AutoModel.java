@@ -4,6 +4,7 @@ import com.acme.auto.entity.Auto;
 import com.acme.auto.entity.Besitzer;
 import com.acme.auto.entity.MarkeType;
 import com.acme.auto.entity.Reparatur;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -16,12 +17,16 @@ import java.util.List;
  * Model-Klasse für Spring HATEOAS, um Links im Response-Body hinzuzufügen
  */
 @Relation(collectionRelation = "autos", itemRelation = "auto")
+@EqualsAndHashCode(onlyExplicitlyIncluded = true, callSuper = false)
 @Getter @Setter
 @ToString(callSuper = true)
-public class AutoModel extends RepresentationModel<AutoModel> {
+class AutoModel extends RepresentationModel<AutoModel> {
     private final String name;
     private final MarkeType marke;
+
+    @EqualsAndHashCode.Include
     private final String kennzeichen;
+
     private int pferdeStaerke;
     private BigDecimal preis;
     private Besitzer besitzer;
