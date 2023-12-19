@@ -81,7 +81,7 @@
 //
 //  14) Initialisierung des Gradle Wrappers in der richtigen Version
 //      dazu ist ggf. eine Internetverbindung erforderlich
-//        gradle wrapper --gradle-version=8.5-rc-4 --distribution-type=bin
+//        gradle wrapper --gradle-version=8.6-milestone-1 --distribution-type=bin
 
 // https://github.com/gradle/kotlin-dsl/tree/master/samples
 // https://docs.gradle.org/current/userguide/kotlin_dsl.html
@@ -99,6 +99,7 @@ val alternativeBuildpack = project.properties["buildpack"]
 
 val mapStructVerbose = project.properties["mapStructVerbose"] == "true" || project.properties["mapStructVerbose"] == "TRUE"
 val useTracing = project.properties["tracingZipkin"] != "false" && project.properties["tracingZipkin"] != "FALSE"
+val activeProfiles = if (project.properties["https"] != "false" && project.properties["https"] != "FALSE") "dev" else "dev,http"
 val useFlyway = project.properties["flyway"] != "false" && project.properties["flyway"] != "FALSE"
 
 plugins {
@@ -248,6 +249,14 @@ repositories {
 //    resolutionStrategy { cacheChangingModulesFor(0, "seconds") }
 // }
 
+// https://github.com/gradle/gradle/issues/27035#issuecomment-1814589243
+// https://github.com/google/guava/releases/tag/v32.1.0
+configurations.checkstyle {
+    resolutionStrategy.capabilitiesResolution.withCapability("com.google.collections:google-collections") {
+        select("com.google.guava:guava:0")
+    }
+}
+
 /* ktlint-disable comment-spacing */
 @Suppress("CommentSpacing")
 // https://docs.gradle.org/current/userguide/java_library_plugin.html#sec:java_library_separation
@@ -262,7 +271,7 @@ dependencies {
     implementation(platform("io.zipkin.reporter2:zipkin-reporter-bom:${libs.versions.zipkinReporter.get()}"))
 
     //testImplementation(platform("org.assertj:assertj-bom:${libs.versions.assertj.get()}"))
-    //testImplementation(platform("org.mockito:mockito-bom:${libs.versions.mockito.get()}"))
+    testImplementation(platform("org.mockito:mockito-bom:${libs.versions.mockito.get()}"))
     //testImplementation(platform("org.junit:junit-bom:${libs.versions.junit.get()}"))
     testImplementation(platform("io.qameta.allure:allure-bom:${libs.versions.allureBom.get()}"))
 
@@ -403,7 +412,7 @@ dependencies {
         //implementation("org.yaml:snakeyaml:${libs.versions.snakeyaml.get()}")
         //implementation("org.slf4j:slf4j-api:${libs.versions.slf4j.get()}")
         //implementation("org.slf4j:jul-to-slf4j:${libs.versions.slf4j.get()}")
-        //implementation("ch.qos.logback:logback-classic:${libs.versions.logback.get()}")
+        implementation("ch.qos.logback:logback-classic:${libs.versions.logback.get()}")
         implementation("org.apache.logging.log4j:log4j-api:${libs.versions.log4j2.get()}")
         implementation("org.apache.logging.log4j:log4j-to-slf4j:${libs.versions.log4j2.get()}")
         //implementation("io.micrometer:micrometer-tracing-bridge-brave:${libs.versions.micrometerTracingBridgeBrave.get()}")
@@ -422,7 +431,7 @@ tasks.named<JavaCompile>("compileJava") {
         isDeprecation = true
         with(compilerArgs) {
             add("-Xlint:unchecked")
-            // fuer springdoc-openapi https://github.com/spring-projects/spring-framework/issues/29563
+            // https://github.com/spring-projects/spring-framework/wiki/Upgrading-to-Spring-Framework-6.x#parameter-name-retention
             add("-parameters")
 
             // https://github.com/tbroyer/gradle-errorprone-plugin#jdk-16-support
@@ -467,6 +476,7 @@ tasks.named<JavaCompile>("compileTestJava") {
     }
 }
 
+// TODO https://github.com/spring-projects/spring-boot/issues/38718
 tasks.named("bootJar", org.springframework.boot.gradle.tasks.bundling.BootJar::class.java) {
     // in src/main/resources/
     exclude("private-key.pem", "certificate.cer")
@@ -477,7 +487,7 @@ tasks.named("bootJar", org.springframework.boot.gradle.tasks.bundling.BootJar::c
             |
             |Aufruf der ausfuehrbaren JAR-Datei:
             |
-            |java --enable-preview -jar build/libs/kunde-2023.10.0.jar `
+            |java --enable-preview -jar build/libs/${project.name}-${project.version}.jar `
             |     --spring.profiles.active=dev `
             |     --spring.ssl.bundle.pem.microservice.keystore.private-key=./src/main/resources/private-key.pem `
             |     --spring.ssl.bundle.pem.microservice.keystore.certificate=./src/main/resources/certificate.crt `
@@ -628,7 +638,7 @@ tasks.named("bootRun", org.springframework.boot.gradle.tasks.run.BootRun::class.
 
     // "System Properties", z.B. fuer Spring Properties oder fuer logback
     // https://docs.spring.io/spring-boot/docs/current/reference/html/application-properties.html#appendix.application-properties
-    systemProperty("spring.profiles.active", "dev")
+    systemProperty("spring.profiles.active", activeProfiles)
     systemProperty("logging.file.name", "./build/log/application.log")
 }
 
@@ -650,7 +660,7 @@ tasks.named<Test>("test") {
         }
     }
 
-    systemProperty("spring.profiles.active", "dev")
+    systemProperty("spring.profiles.active", activeProfiles)
     systemProperty("junit.platform.output.capture.stdout", true)
     systemProperty("junit.platform.output.capture.stderr", true)
 

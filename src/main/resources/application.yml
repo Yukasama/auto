@@ -46,7 +46,7 @@ spring:
     # Tablespace fuer flyway_schema_history
     # MySQL: Flyway generiert bei "CREATE TABLE flyway_schema_history ..." nicht "ROW_FORMAT=COMPACT"
     # Oracle: CREATE TABLESPACE ist sehr kompliziert https://docs.oracle.com/en/database/oracle/oracle-database/21/sqlrf/CREATE-TABLESPACE.html
-    #tablespace: kundespace
+    # tablespace: autospace
   # https://docs.spring.io/spring-boot/docs/current/reference/html/application-properties.html#appendix.application-properties.data
   jpa:
     #database-platform: POSTGRESQL

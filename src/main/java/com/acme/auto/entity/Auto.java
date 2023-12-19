@@ -1,22 +1,44 @@
 package com.acme.auto.entity;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
+import jakarta.persistence.OrderColumn;
+import jakarta.persistence.Table;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Positive;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
+import static jakarta.persistence.CascadeType.PERSIST;
+import static jakarta.persistence.CascadeType.REMOVE;
+import static jakarta.persistence.EnumType.STRING;
+import static jakarta.persistence.FetchType.LAZY;
 
 /**
  * Daten eines Autos. In DDD ist Auto ist ein Aggregate Root.
  */
+@Entity
+@Table(name = "auto")
+@NoArgsConstructor
+@AllArgsConstructor
 @Builder
 @EqualsAndHashCode(onlyExplicitlyIncluded = true, callSuper = false)
 @Getter @Setter
@@ -33,6 +55,8 @@ public class Auto {
      * @param id Auto ID
      * @return Auto ID
      */
+    @Id
+    @GeneratedValue
     @EqualsAndHashCode.Include
     private UUID id;
 
@@ -50,6 +74,7 @@ public class Auto {
      * @return Automarke
      */
     @NotNull
+    @Enumerated(STRING)
     private MarkeType marke;
 
     /**
@@ -83,6 +108,9 @@ public class Auto {
      */
     @Valid
     @ToString.Exclude
+    @OneToOne(cascade = {PERSIST, REMOVE},
+              fetch = LAZY,
+              orphanRemoval = true)
     private Besitzer besitzer;
 
     /**
@@ -92,5 +120,16 @@ public class Auto {
      */
     @Valid
     @ToString.Exclude
+    @OneToMany(cascade = {PERSIST, REMOVE},
+               orphanRemoval = true)
+    @JoinColumn(name = "auto_id")
+    @OrderColumn(name = "idx")
     private List<Reparatur> reparaturen;
+
+    @CreationTimestamp
+    private LocalDateTime createdAt;
+
+    @UpdateTimestamp
+    private LocalDateTime updatedAt;
+
 }

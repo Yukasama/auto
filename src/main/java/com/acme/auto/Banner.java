@@ -39,8 +39,6 @@ import org.springframework.security.core.SpringSecurityCoreVersion;
 })
 @SuppressFBWarnings("NP_NULL_ON_SOME_PATH_FROM_RETURN_VALUE")
 final class Banner {
-
-    // http://patorjk.com/software/taag/#p=display&f=Slant&t=kunde%20v1
     private static final String FIGLET = """
                                                   tttt                          \s
                                                ttt:::t                          \s
