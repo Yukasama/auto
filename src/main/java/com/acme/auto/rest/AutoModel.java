@@ -4,7 +4,6 @@ import com.acme.auto.entity.Auto;
 import com.acme.auto.entity.Besitzer;
 import com.acme.auto.entity.FeatureType;
 import com.acme.auto.entity.MarkeType;
-import com.acme.auto.entity.Reparatur;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
@@ -32,7 +31,6 @@ class AutoModel extends RepresentationModel<AutoModel> {
     private BigDecimal preis;
     private List<FeatureType> features;
     private Besitzer besitzer;
-    private List<Reparatur> reparaturen;
 
     AutoModel(final Auto auto) {
         name = auto.getName();
@@ -42,6 +40,5 @@ class AutoModel extends RepresentationModel<AutoModel> {
         preis = auto.getPreis();
         features = auto.getFeatures();
         besitzer = auto.getBesitzer();
-        reparaturen = auto.getReparaturen();
     }
 }

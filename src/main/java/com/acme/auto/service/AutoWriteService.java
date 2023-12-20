@@ -73,14 +73,14 @@ public class AutoWriteService {
         }
 
         final var kennzeichen = auto.getKennzeichen();
-        final var autoDB = autoDBOpt.get();
+        var autoDB = autoDBOpt.get();
         if (!autoDB.getKennzeichen().equals(kennzeichen) && repo.existsByKennzeichen(kennzeichen)) {
             log.debug("update: Kennzeichen {} existiert bereits.", kennzeichen);
             throw new KennzeichenExistsException(kennzeichen);
         }
 
-        auto.setId(id);
-        repo.save(auto);
+        autoDB.set(auto);
+        autoDB = repo.save(auto);
         log.debug("update: {} -> {}", autoDB, auto);
     }
 

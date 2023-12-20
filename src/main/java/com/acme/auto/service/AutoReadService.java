@@ -69,7 +69,7 @@ public class AutoReadService {
         final var namen = suchkriterien.get("name");
         if (namen != null && namen.size() == 1) {
             final var autos = repo.findByName(namen.getFirst());
-            if(autos.isEmpty()) {
+            if (autos.isEmpty()) {
                 throw new NotFoundException(suchkriterien);
             }
             log.debug("find (name): {}", autos);

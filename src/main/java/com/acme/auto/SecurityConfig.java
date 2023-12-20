@@ -50,7 +50,7 @@ interface SecurityConfig {
     @Bean
     default SecurityFilterChain securityFilterChain(final HttpSecurity http) throws Exception {
         return http
-            // TODO Regeln fuer Zugriffsschutz definieren: Pfade und Rollen
+            // Regeln fuer Zugriffsschutz definieren: Pfade und Rollen
             .authorizeHttpRequests(authorize -> authorize.anyRequest().permitAll())
             .httpBasic(withDefaults())
             .formLogin(AbstractHttpConfigurer::disable)

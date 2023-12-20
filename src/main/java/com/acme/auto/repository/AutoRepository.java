@@ -20,17 +20,17 @@ import java.util.UUID;
 public interface AutoRepository extends JpaRepository<Auto, UUID>, JpaSpecificationExecutor<Auto> {
     @NonNull
     @Override
-    @EntityGraph(attributePaths = {"besitzer"})
+    @EntityGraph(attributePaths = {"besitzer", "reparaturen"})
     List<Auto> findAll();
 
     @NonNull
     @Override
-    @EntityGraph(attributePaths = {"besitzer"})
+    @EntityGraph(attributePaths = {"besitzer", "reparaturen"})
     List<Auto> findAll(@NonNull Specification spec);
 
     @NonNull
     @Override
-    @EntityGraph(attributePaths = "besitzer")
+    @EntityGraph(attributePaths = {"besitzer"})
     Optional<Auto> findById(@NonNull UUID id);
 
     /**
@@ -43,6 +43,7 @@ public interface AutoRepository extends JpaRepository<Auto, UUID>, JpaSpecificat
         FROM Auto a
         WHERE lower(a.name) LIKE concat('%', lower(:name), '%')
         """)
+    @EntityGraph(attributePaths = {"besitzer"})
     List<Auto> findByName(String name);
 
     /**
@@ -55,6 +56,7 @@ public interface AutoRepository extends JpaRepository<Auto, UUID>, JpaSpecificat
         FROM Auto a
         WHERE lower(a.marke) = lower(:markeStr)
         """)
+    @EntityGraph(attributePaths = {"besitzer"})
     Collection<Auto> findByMarke(String markeStr);
 
     /**
@@ -65,9 +67,10 @@ public interface AutoRepository extends JpaRepository<Auto, UUID>, JpaSpecificat
     @Query("""
         SELECT a
         FROM Auto a
-        JOIN a.reparaturen r
+        JOIN FETCH a.reparaturen r
         WHERE lower(r.beschreibung) = lower(:beschreibung)
         """)
+    @EntityGraph(attributePaths = {"besitzer", "reparaturen"})
     Collection<Auto> findByReparatur(String beschreibung);
 
     /**
@@ -76,6 +79,4 @@ public interface AutoRepository extends JpaRepository<Auto, UUID>, JpaSpecificat
      * @return Existiert das Kennzeichen?
      */
     boolean existsByKennzeichen(String kennzeichen);
-
-
 }
