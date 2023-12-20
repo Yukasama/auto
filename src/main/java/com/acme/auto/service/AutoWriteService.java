@@ -6,6 +6,7 @@ import jakarta.validation.Validator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import java.util.UUID;
 
 /**
@@ -13,6 +14,7 @@ import java.util.UUID;
  */
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 @Slf4j
 public class AutoWriteService {
     private final AutoRepository repo;
@@ -26,21 +28,22 @@ public class AutoWriteService {
      * @throws ConstraintViolationsException Falls mindestens ein Constraint verletzt ist.
      * @throws KennzeichenExistsException Es gibt bereits ein Auto mit diesem Kennzeichen.
      */
+    @Transactional
     public Auto create(final Auto auto) {
         log.debug("create: auto={}", auto);
 
         final var violations = validator.validate(auto);
-        if(!violations.isEmpty()) {
+        if (!violations.isEmpty()) {
             log.debug("create: violations={}", violations);
             throw new ConstraintViolationsException(violations);
         }
 
         final var kennzeichen = auto.getKennzeichen();
-        if(repo.isKennzeichenExisting(kennzeichen)) {
+        if (repo.existsByKennzeichen(kennzeichen)) {
             throw new KennzeichenExistsException(kennzeichen);
         }
 
-        final var autoDB = repo.create(auto);
+        final var autoDB = repo.save(auto);
         log.debug("create: {}", autoDB);
         return autoDB;
     }
@@ -54,29 +57,30 @@ public class AutoWriteService {
      * @throws NotFoundException Kein Auto zur ID vorhanden.
      * @throws KennzeichenExistsException Es gibt bereits ein Auto mit diesem Kennzeichen.
      */
+    @Transactional
     public void update(final Auto auto, final UUID id) {
         log.debug("update: auto={} id={}", auto, id);
 
         final var violations = validator.validate(auto);
-        if(!violations.isEmpty()) {
+        if (!violations.isEmpty()) {
             log.debug("update: violations={}", violations);
             throw new ConstraintViolationsException(violations);
         }
 
         final var autoDBOpt = repo.findById(id);
-        if(autoDBOpt.isEmpty()) {
+        if (autoDBOpt.isEmpty()) {
             throw new NotFoundException(id);
         }
 
         final var kennzeichen = auto.getKennzeichen();
         final var autoDB = autoDBOpt.get();
-        if(!autoDB.getKennzeichen().equals(kennzeichen) && repo.isKennzeichenExisting(kennzeichen)) {
+        if (!autoDB.getKennzeichen().equals(kennzeichen) && repo.existsByKennzeichen(kennzeichen)) {
             log.debug("update: Kennzeichen {} existiert bereits.", kennzeichen);
             throw new KennzeichenExistsException(kennzeichen);
         }
 
         auto.setId(id);
-        repo.update(auto);
+        repo.save(auto);
         log.debug("update: {} -> {}", autoDB, auto);
     }
 
@@ -84,11 +88,11 @@ public class AutoWriteService {
         log.debug("delete: id={}", id);
 
         final var autoDBOpt = repo.findById(id);
-        if(autoDBOpt.isEmpty()) {
+        if (autoDBOpt.isEmpty()) {
             throw new NotFoundException(id);
         }
 
-        repo.delete(id);
+        repo.deleteById(id);
         log.debug("delete: {}", autoDBOpt);
     }
 }

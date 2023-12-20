@@ -1,5 +1,6 @@
 package com.acme.auto.service;
 
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import lombok.Getter;
@@ -17,7 +18,7 @@ public final class NotFoundException extends RuntimeException {
     /**
      * Suchkriterien, zu denen nichts gefunden wurde.
      */
-    private final Map<String, String> suchkriterien;
+    private final Map<String, List<String>> suchkriterien;
 
     NotFoundException(final UUID id) {
         super(STR."Kein Auto mit der ID \{id} gefunden.");
@@ -25,7 +26,7 @@ public final class NotFoundException extends RuntimeException {
         this.suchkriterien = null;
     }
 
-    NotFoundException(final Map<String, String> suchkriterien) {
+    NotFoundException(final Map<String, List<String>> suchkriterien) {
         super(STR."Keine Autos gefunden: suchkriterien=\{suchkriterien}");
         this.id = null;
         this.suchkriterien = suchkriterien;

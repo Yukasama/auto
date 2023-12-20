@@ -1,10 +1,3 @@
-CREATE TABLE IF NOT EXISTS login (
-    id        UUID PRIMARY KEY,
-    username  VARCHAR(20) UNIQUE NOT NULL,
-    password  VARCHAR(180) NOT NULL,
-    rollen    VARCHAR(32)
-);
-
 CREATE TABLE IF NOT EXISTS besitzer (
     id        UUID PRIMARY KEY,
     vorname   VARCHAR(100) NOT NULL,
@@ -20,6 +13,7 @@ CREATE TABLE IF NOT EXISTS auto (
     kennzeichen    VARCHAR(9) NOT NULL CHECK (kennzeichen ~ '^[A-ZÄÖÜ]{1,3}-[A-Z]{1,2}-[1-9]\d{0,3}E?'),
     pferdeStaerke  INTEGER CHECK (pferdeStaerke < 0)
     preis          DECIMAL(10, 2)
+    features       VARCHAR(30)
     besitzer_id    UUID NOT NULL UNIQUE REFERENCES besitzer,
     username       VARCHAR(20) NOT NULL UNIQUE REFERENCES login(username),
     created        TIMESTAMP NOT NULL,

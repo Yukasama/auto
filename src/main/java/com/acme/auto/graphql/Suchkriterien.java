@@ -1,6 +1,7 @@
 package com.acme.auto.graphql;
 
-import java.util.HashMap;
+import org.springframework.util.LinkedMultiValueMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -17,17 +18,19 @@ record Suchkriterien (
      * Konvertierung in eine Map.
      * @return Das konvertierte Map-Objekt
      */
-    Map<String, String> toMap() {
-        final Map<String, String> map = new HashMap<>(3);
+    Map<String, List<String>> toMap() {
+        final Map<String, List<String>> map = new LinkedMultiValueMap<>();
+
         if (name != null) {
-            map.put("name", name);
+            map.put("name", List.of(name));
         }
         if (marke != null) {
-            map.put("marke", marke);
+            map.put("marke", List.of(marke));
         }
         if (reparatur != null) {
-            map.put("reparatur", reparatur);
+            map.put("reparatur", List.of(reparatur));
         }
+
         return map;
     }
 }

@@ -7,7 +7,6 @@ import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -22,7 +21,6 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@EqualsAndHashCode(onlyExplicitlyIncluded = true, callSuper = false)
 @Getter @Setter
 @ToString
 @SuppressWarnings({"JavadocDeclaration"})
@@ -34,7 +32,6 @@ public class Besitzer {
      */
     @Id
     @GeneratedValue
-    @EqualsAndHashCode.Include
     private UUID id;
 
     /**

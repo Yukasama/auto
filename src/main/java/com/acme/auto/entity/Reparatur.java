@@ -12,7 +12,6 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Past;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -26,7 +25,6 @@ import lombok.ToString;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@EqualsAndHashCode(onlyExplicitlyIncluded = true, callSuper = false)
 @Getter @Setter
 @ToString
 @SuppressWarnings({"JavadocDeclaration"})
@@ -38,7 +36,6 @@ public class Reparatur {
      */
     @Id
     @GeneratedValue
-    @EqualsAndHashCode.Include
     private UUID id;
 
     /**

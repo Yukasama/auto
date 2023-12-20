@@ -1,5 +1,6 @@
 package com.acme.auto.rest;
 
+import com.acme.auto.entity.FeatureType;
 import com.acme.auto.entity.MarkeType;
 import java.math.BigDecimal;
 import java.util.List;
@@ -11,6 +12,7 @@ import java.util.List;
  * @param kennzeichen Gültiges Kennzeichen des Autos, d.h. mit passendem Muster
  * @param pferdeStaerke Pferdestärke des Autos
  * @param preis Preis des Autos
+ * @param features Features des Autos
  * @param besitzer Besitzer des Autos als DTO
  * @param reparaturen Reparaturen des Autos als DTO
  */
@@ -20,6 +22,7 @@ record AutoDTO (
     String kennzeichen,
     int pferdeStaerke,
     BigDecimal preis,
+    List<FeatureType> features,
     BesitzerDTO besitzer,
     List<ReparaturDTO> reparaturen
 ) {}

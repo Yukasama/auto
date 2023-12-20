@@ -1,5 +1,6 @@
 package com.acme.auto.graphql;
 
+import com.acme.auto.entity.FeatureType;
 import com.acme.auto.entity.MarkeType;
 import java.math.BigDecimal;
 import java.util.List;
@@ -11,6 +12,7 @@ import java.util.List;
  * @param kennzeichen Kennzeichen des Autos
  * @param pferdeStaerke Pferdestärke des Autos
  * @param preis Preis des Autos
+ * @param features Features des Autos
  * @param besitzer Besitzer des Autos
  * @param reparaturen Reparaturen des Autos
  */
@@ -20,6 +22,7 @@ record AutoInput (
     String kennzeichen,
     int pferdeStaerke,
     BigDecimal preis,
+    List<FeatureType> features,
     BesitzerInput besitzer,
     List<ReparaturInput> reparaturen
 ) {}

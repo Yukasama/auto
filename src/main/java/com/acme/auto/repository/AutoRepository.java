@@ -1,200 +1,81 @@
 package com.acme.auto.repository;
 
 import com.acme.auto.entity.Auto;
-import com.acme.auto.entity.MarkeType;
-import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.jpa.domain.Specification;
+import org.springframework.data.jpa.repository.EntityGraph;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Repository;
-import static com.acme.auto.repository.DB.AUTOS;
-import static java.util.Collections.emptyList;
-import static java.util.UUID.randomUUID;
 import java.util.Collection;
-import java.util.Map;
-import java.util.Objects;
+import java.util.List;
 import java.util.Optional;
-import java.util.OptionalInt;
 import java.util.UUID;
-import java.util.stream.IntStream;
 
 /**
  * Repository für den DB-Zugriff bei Autos
  */
 @Repository
-@Slf4j
-@SuppressWarnings("PublicConstructor")
-public class AutoRepository {
-    /**
-     * Auto nach seiner ID suchen
-     * @param id Die ID des gesuchten Autos
-     * @return Optionales Auto mit ID oder leeres Optional
-     */
-    public Optional<Auto> findById(final UUID id) {
-        log.debug("findById: id={}", id);
-        final var autoOpt = AUTOS.stream()
-            .filter(auto -> Objects.equals(auto.getId(), id))
-            .findFirst();
-        log.debug("findById: {}", autoOpt);
-        return autoOpt;
-    }
+public interface AutoRepository extends JpaRepository<Auto, UUID>, JpaSpecificationExecutor<Auto> {
+    @NonNull
+    @Override
+    @EntityGraph(attributePaths = {"besitzer"})
+    List<Auto> findAll();
 
-    /**
-     * Autos nach Suchkriterien filtern und zurückgeben
-     * @param suchkriterien Suchkriterien für Autos
-     * @return Autos nach Suchkriterien zurückgeben
-     */
-    public Collection<Auto> find(final Map<String, String> suchkriterien) {
-        log.debug("find: suchkriterien={}", suchkriterien);
+    @NonNull
+    @Override
+    @EntityGraph(attributePaths = {"besitzer"})
+    List<Auto> findAll(@NonNull Specification spec);
 
-        if(suchkriterien.isEmpty()) {
-            return findAll();
-        }
-
-        for (final var entry : suchkriterien.entrySet()) {
-            switch (entry.getKey()) {
-                case "name" -> {
-                    return findByName(entry.getValue());
-                }
-                case "marke" -> {
-                    return findByMarke(entry.getValue());
-                }
-                case "reparatur" -> {
-                    return findByReparatur(entry.getValue());
-                }
-                default -> {
-                    log.debug("find: ungueltiges Suchkriterium={}", entry.getKey());
-                    return emptyList();
-                }
-            }
-        }
-
-        return emptyList();
-    }
-
-    /**
-     * Rückgabe aller Autos in der DB
-     * @return Alle Autos in DB
-     */
-    public Collection<Auto> findAll() { return AUTOS; }
+    @NonNull
+    @Override
+    @EntityGraph(attributePaths = "besitzer")
+    Optional<Auto> findById(@NonNull UUID id);
 
     /**
      * Auto anhand des Namen suchen
      * @param name Name des Autos
      * @return Alle gefundenen Autos
      */
-    public Collection<Auto> findByName(final String name) {
-        log.debug("findByName: name={}", name);
-        final var autos = AUTOS.stream()
-            .filter(auto -> auto.getName().contains(name))
-            .toList();
-        log.debug("findbyName: {}", autos);
-        return autos;
-    }
+    @Query("""
+        SELECT a
+        FROM Auto a
+        WHERE lower(a.name) LIKE concat('%', lower(:name), '%')
+        """)
+    List<Auto> findByName(String name);
 
     /**
      * Auto anhand der Automarke suchen
      * @param markeStr Automarke des Autos
      * @return Alle gefundenen Autos
      */
-    public Collection<Auto> findByMarke(final String markeStr) {
-        log.debug("findByMarke: marke={}", markeStr);
-
-        final var marke = MarkeType.of(markeStr).orElse(null);
-        if(marke == null) {
-            log.debug("findByMarke: Keine Autos gefunden.");
-            return emptyList();
-        }
-
-        final var autos = AUTOS.stream()
-            .filter(auto -> auto.getMarke().equals(marke))
-            .toList();
-
-        log.debug("findByMarke: {}", autos);
-        return autos;
-    }
+    @Query("""
+        SELECT a
+        FROM Auto a
+        WHERE lower(a.marke) = lower(:markeStr)
+        """)
+    Collection<Auto> findByMarke(String markeStr);
 
     /**
      * Auto anhand Beschreibung der Reparaturen suchen
      * @param beschreibung Beschreibung der Reparatur
      * @return Alle gefundenen Autos
      */
-    public Collection<Auto> findByReparatur(final String beschreibung) {
-        log.debug("findByReparatur: beschreibung={}", beschreibung);
-
-        final var autos = AUTOS.stream()
-            .filter(auto -> auto.getReparaturen() != null &&
-                !auto.getReparaturen().isEmpty())
-            .filter(auto -> auto.getReparaturen().stream()
-                .anyMatch(reparatur -> reparatur.getBeschreibung()
-                    .equalsIgnoreCase(beschreibung)))
-            .toList();
-
-        log.debug("findByReparatur: {}", autos);
-        return autos;
-    }
+    @Query("""
+        SELECT a
+        FROM Auto a
+        JOIN a.reparaturen r
+        WHERE lower(r.beschreibung) = lower(:beschreibung)
+        """)
+    Collection<Auto> findByReparatur(String beschreibung);
 
     /**
      * Existiert ein Kennzeichen bereits
      * @param kennzeichen Das Autokennzeichen
      * @return Existiert das Kennzeichen?
      */
-    public boolean isKennzeichenExisting(final String kennzeichen) {
-        log.debug("existiertKennzeichen: {}", kennzeichen);
+    boolean existsByKennzeichen(String kennzeichen);
 
-        final var count = AUTOS.stream()
-            .filter(a -> a.getKennzeichen().equals(kennzeichen))
-            .count();
 
-        log.debug("existiertKennzeichen: count={}", count);
-        return count > 0L;
-    }
-
-    /**
-     * Ein neues Auto anlegen
-     * @param auto Autoobjekt des neu anzulegenden Autos
-     * @return Neuangelegtes Auto mit generierter ID
-     */
-    public Auto create(final Auto auto) {
-        log.debug("create: input={}", auto);
-
-        auto.setId(randomUUID());
-        auto.getBesitzer().setId(randomUUID());
-        auto.getReparaturen()
-            .forEach(reparatur -> reparatur.setId(randomUUID()));
-
-        AUTOS.add(auto);
-        log.debug("create: {}", auto);
-        return auto;
-    }
-
-    /**
-     * Ein vorhandenes Auto aktualisieren
-     * @param auto Objekt mit neuen Daten
-     */
-    public void update(final Auto auto) {
-        log.debug("update: input={}", auto);
-
-        final OptionalInt index = IntStream
-            .range(0, AUTOS.size())
-            .filter(a -> AUTOS.get(a).getId().equals(auto.getId()))
-            .findFirst();
-        log.trace("update: index={}", index);
-
-        if(index.isEmpty()) {
-            return;
-        }
-
-        // Neue ID für untergeordnete Objekte
-        auto.getBesitzer().setId(randomUUID());
-        auto.getReparaturen()
-            .forEach(reparatur -> reparatur.setId(randomUUID()));
-
-        AUTOS.set(index.getAsInt(), auto);
-        log.debug("update: {}", auto);
-    }
-
-    public void delete(final UUID id) {
-        log.debug("delete: id={}", id);
-        int priorSize = AUTOS.size();
-        AUTOS.removeIf(auto -> auto.getId().equals(id));
-        log.debug("delete: size=[{} -> {}]", priorSize, AUTOS.size());
-    }
 }

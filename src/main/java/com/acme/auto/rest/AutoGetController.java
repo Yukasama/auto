@@ -8,12 +8,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.LinkRelation;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import java.util.Map;
 import java.util.UUID;
 import static org.springframework.hateoas.MediaTypes.HAL_JSON_VALUE;
 
@@ -73,7 +73,7 @@ public class AutoGetController {
     @Operation(summary = "Suche nach Auto anhand Suchkriterien", tags = "Suchen")
     @ApiResponse(responseCode = "200", description = "Auto gefunden")
     @ApiResponse(responseCode = "404", description = "Auto nicht gefunden")
-    CollectionModel<AutoModel> get(@RequestParam Map<String, String> suchkriterien) {
+    CollectionModel<AutoModel> get(@RequestParam MultiValueMap<String, String> suchkriterien) {
         log.debug("get: suchkriterien={}", suchkriterien);
         final var autos = service.find(suchkriterien);
 

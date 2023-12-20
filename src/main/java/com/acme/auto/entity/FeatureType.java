@@ -2,39 +2,30 @@ package com.acme.auto.entity;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
-import java.util.Objects;
-import java.util.Optional;
 import java.util.stream.Stream;
 
 /**
- * Enum für mögliche Marken eines Autos
+ * Enum für mögliche Features eines Autos
  */
-public enum MarkeType {
+public enum FeatureType {
     /**
-     * _Volkswagen_ mit dem internen Wert `VW`
+     * _Autonom_ mit dem internen Wert `A`, ob ein Auto autonom fahren kann
      */
-    VOLKSWAGEN("VW"),
+    AUTONOM("A"),
 
     /**
-     * _Mercedes_ mit dem internen Wert `M`
+     * _Sportmodus_ mit dem internen Wert `S`, ob ein Auto einen Sportmodus hat
      */
-    MERCEDES("M"),
+    SPORTMODUS("S"),
 
     /**
-     * _Ford_ mit dem internen Wert `F`
+     * _Display_ mit dem internen Wert `D`, ob ein Auto ein eingebautes Display hat
      */
-    FORD("F"),
-
-    /**
-     * _Tesla_ mit dem internen Wert `T`
-     */
-    TESLA("T");
+    DISPLAY("D");
 
     private final String value;
 
-    MarkeType(final String value) {
-        this.value = value;
-    }
+    FeatureType(final String value) { this.value = value; }
 
     /**
      * Einen enum-Wert als String mit dem internen Wert ausgeben.
@@ -53,9 +44,10 @@ public enum MarkeType {
      * @return Erfolgreich gefundener Enum-Wert oder null
      */
     @JsonCreator
-    public static Optional<MarkeType> of(final String value) {
+    public static FeatureType of(final String value) {
         return Stream.of(values())
-            .filter(marke -> Objects.equals(marke.value, value))
-            .findFirst();
+            .filter(feature -> feature.value.equalsIgnoreCase(value))
+            .findFirst()
+            .orElse(null);
     }
 }

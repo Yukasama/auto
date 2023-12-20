@@ -26,6 +26,7 @@ type Auto {
   kennzeichen: String!
   pferdeStaerke: Int!
   preis: String!
+  features: [String!]
   besitzer: Besitzer!
   reparaturen: [Reparatur!]
 }
@@ -59,6 +60,7 @@ input AutoInput {
   kennzeichen: String!
   pferdeStaerke: Int!
   preis: String!
+  features: [FeatureType!]
   besitzer: BesitzerInput!
   reparaturen: [ReparaturInput!]
 }
@@ -69,6 +71,13 @@ enum MarkeType {
   MERCEDES
   FORD
   TESLA
+}
+
+"Enum für Features eines Autos"
+enum FeatureType {
+  AUTONOM
+  SPORTMODUS
+  DISPLAY
 }
 
 "Input für einen Besitzer eines Autos"

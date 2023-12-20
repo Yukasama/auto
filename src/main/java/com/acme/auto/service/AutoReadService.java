@@ -1,11 +1,14 @@
 package com.acme.auto.service;
 
 import com.acme.auto.entity.Auto;
+import com.acme.auto.repository.SpecificationBuilder;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import com.acme.auto.repository.AutoRepository;
+import org.springframework.transaction.annotation.Transactional;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -14,9 +17,11 @@ import java.util.UUID;
  */
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 @Slf4j
 public class AutoReadService {
     private final AutoRepository repo;
+    private final SpecificationBuilder specBuilder;
 
     /**
      * Auto anhand der ID suchen
@@ -38,15 +43,49 @@ public class AutoReadService {
      * @return Alle Autos entsprechend den Suchkriterien
      * @throws NotFoundException Kein Auto entspricht den Suchkriterien
      */
-    public Collection<Auto> find(final Map<String, String> suchkriterien) {
+    public Collection<Auto> find(final Map<String, List<String>> suchkriterien) {
         log.debug("find: suchkriterien={}", suchkriterien);
-
-        if(suchkriterien.isEmpty()) {
+        if (suchkriterien.isEmpty()) {
             return repo.findAll();
         }
 
-        final var autos = repo.find(suchkriterien);
-        if(autos.isEmpty()) {
+        if (suchkriterien.size() == 1) {
+            final var namen = suchkriterien.get("name");
+            if (namen != null && namen.size() == 1) {
+                final var autos = repo.findByName(namen.getFirst());
+                if(autos.isEmpty()) {
+                    throw new NotFoundException(suchkriterien);
+                }
+                log.debug("find (name): {}", autos);
+                return autos;
+            }
+
+            final var marken = suchkriterien.get("marke");
+            if (marken != null && marken.size() == 1) {
+                final var autos = repo.findByMarke(marken.getFirst());
+                if (autos.isEmpty()) {
+                    throw new NotFoundException(suchkriterien);
+                }
+                log.debug("find (marke): {}", autos);
+                return autos;
+            }
+
+            final var reparaturen = suchkriterien.get("reparatur");
+            if (reparaturen != null && reparaturen.size() == 1) {
+                final var autos = repo.findByReparatur(reparaturen.getFirst());
+                if (autos.isEmpty()) {
+                    throw new NotFoundException(suchkriterien);
+                }
+                log.debug("find (reparatur): {}", autos);
+                return autos;
+            }
+        }
+
+        final var specs = specBuilder.build(suchkriterien)
+            .orElseThrow(() -> new NotFoundException(suchkriterien));
+
+        final var autos = repo.findAll(specs);
+        if (autos.isEmpty()) {
             throw new NotFoundException(suchkriterien);
         }
 

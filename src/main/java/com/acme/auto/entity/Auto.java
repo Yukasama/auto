@@ -2,8 +2,10 @@ package com.acme.auto.entity;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
@@ -12,7 +14,10 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.OrderColumn;
+import jakarta.persistence.PostLoad;
+import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -20,17 +25,18 @@ import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Positive;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
+import org.hibernate.validator.constraints.UniqueElements;
 import static jakarta.persistence.CascadeType.PERSIST;
 import static jakarta.persistence.CascadeType.REMOVE;
 import static jakarta.persistence.EnumType.STRING;
 import static jakarta.persistence.FetchType.LAZY;
+import static java.util.Collections.emptyList;
 
 /**
  * Daten eines Autos. In DDD ist Auto ist ein Aggregate Root.
@@ -40,7 +46,6 @@ import static jakarta.persistence.FetchType.LAZY;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@EqualsAndHashCode(onlyExplicitlyIncluded = true, callSuper = false)
 @Getter @Setter
 @ToString
 @SuppressWarnings({"JavadocDeclaration"})
@@ -57,7 +62,6 @@ public class Auto {
      */
     @Id
     @GeneratedValue
-    @EqualsAndHashCode.Include
     private UUID id;
 
     /**
@@ -102,6 +106,18 @@ public class Auto {
     private BigDecimal preis;
 
     /**
+     * Features eines Autos
+     * @param features Features
+     * @return Features
+     */
+    @Transient
+    @UniqueElements
+    private List<FeatureType> features;
+
+    @Column(name = "features")
+    private String featuresStr;
+
+    /**
      * Wer besitzt das Auto
      * @param besitzer Autobesitzer
      * @return Autobesitzer
@@ -132,4 +148,39 @@ public class Auto {
     @UpdateTimestamp
     private LocalDateTime updatedAt;
 
+    /**
+     * Autodaten überschreiben
+     * @param auto Autodaten
+     */
+    public void set(final Auto auto) {
+        name = auto.name;
+        marke = auto.marke;
+        kennzeichen = auto.kennzeichen;
+        pferdeStaerke = auto.pferdeStaerke;
+        preis = auto.preis;
+    }
+
+    @PrePersist
+    private void buildFeaturesStr() {
+        if (features == null || features.isEmpty()) {
+            featuresStr = null;
+            return;
+        }
+        final var featuresList = features.stream()
+            .map(Enum::name)
+            .toList();
+        featuresStr = String.join(",", featuresList);
+    }
+
+    @PostLoad
+    private void loadFeatures() {
+        if (featuresStr == null) {
+            features = emptyList();
+            return;
+        }
+        final var featuresArray = featuresStr.split(",");
+        features = Arrays.stream(featuresArray)
+            .map(FeatureType::valueOf)
+            .toList();
+    }
 }
