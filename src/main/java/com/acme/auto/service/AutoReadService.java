@@ -50,35 +50,7 @@ public class AutoReadService {
         }
 
         if (suchkriterien.size() == 1) {
-            final var namen = suchkriterien.get("name");
-            if (namen != null && namen.size() == 1) {
-                final var autos = repo.findByName(namen.getFirst());
-                if(autos.isEmpty()) {
-                    throw new NotFoundException(suchkriterien);
-                }
-                log.debug("find (name): {}", autos);
-                return autos;
-            }
-
-            final var marken = suchkriterien.get("marke");
-            if (marken != null && marken.size() == 1) {
-                final var autos = repo.findByMarke(marken.getFirst());
-                if (autos.isEmpty()) {
-                    throw new NotFoundException(suchkriterien);
-                }
-                log.debug("find (marke): {}", autos);
-                return autos;
-            }
-
-            final var reparaturen = suchkriterien.get("reparatur");
-            if (reparaturen != null && reparaturen.size() == 1) {
-                final var autos = repo.findByReparatur(reparaturen.getFirst());
-                if (autos.isEmpty()) {
-                    throw new NotFoundException(suchkriterien);
-                }
-                log.debug("find (reparatur): {}", autos);
-                return autos;
-            }
+            return findSingleCriteria(suchkriterien);
         }
 
         final var specs = specBuilder.build(suchkriterien)
@@ -91,5 +63,39 @@ public class AutoReadService {
 
         log.debug("find: {}", autos);
         return autos;
+    }
+
+    private Collection<Auto> findSingleCriteria(final Map<String, List<String>> suchkriterien) {
+        final var namen = suchkriterien.get("name");
+        if (namen != null && namen.size() == 1) {
+            final var autos = repo.findByName(namen.getFirst());
+            if(autos.isEmpty()) {
+                throw new NotFoundException(suchkriterien);
+            }
+            log.debug("find (name): {}", autos);
+            return autos;
+        }
+
+        final var marken = suchkriterien.get("marke");
+        if (marken != null && marken.size() == 1) {
+            final var autos = repo.findByMarke(marken.getFirst());
+            if (autos.isEmpty()) {
+                throw new NotFoundException(suchkriterien);
+            }
+            log.debug("find (marke): {}", autos);
+            return autos;
+        }
+
+        final var reparaturen = suchkriterien.get("reparatur");
+        if (reparaturen != null && reparaturen.size() == 1) {
+            final var autos = repo.findByReparatur(reparaturen.getFirst());
+            if (autos.isEmpty()) {
+                throw new NotFoundException(suchkriterien);
+            }
+            log.debug("find (reparatur): {}", autos);
+            return autos;
+        }
+
+        throw new NotFoundException(suchkriterien);
     }
 }
