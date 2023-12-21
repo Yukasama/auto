@@ -18,6 +18,7 @@ import jakarta.persistence.PostLoad;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
 import jakarta.persistence.Transient;
+import jakarta.persistence.Version;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -63,6 +64,14 @@ public class Auto {
     @Id
     @GeneratedValue
     private UUID id;
+
+    /**
+     * Versionsnummer für optimistische Synchronisierung
+     * @param version Version
+     * @return Version
+     */
+    @Version
+    private int version;
 
     /**
      * Der Name des Autos

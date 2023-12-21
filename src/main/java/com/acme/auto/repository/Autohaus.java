@@ -14,25 +14,13 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
-package com.acme.auto.dev;
-
-import org.springframework.context.annotation.Profile;
-import static com.acme.auto.dev.DevConfig.DEV;
+package com.acme.auto.repository;
 
 /**
- * Konfigurationsklasse für die Anwendung bzw. den Microservice, falls das Profile _dev_ aktiviert ist.
+ * Entity-Klasse für den REST-Client.
  *
- * @author <a href="mailto:Juergen.Zimmermann@h-ka.de">Jürgen Zimmermann</a>
+ * @param nachname Nachname
+ * @param email Emailadresse
  */
-@Profile(DEV)
-@SuppressWarnings({"ClassNamePrefixedWithPackageName", "HideUtilityClassConstructor"})
-public class DevConfig implements Flyway, LogRequestHeaders, K8s {
-    /**
-     * Konstante für das Spring-Profile "dev".
-     */
-    public static final String DEV = "dev";
-
-    DevConfig() {
-    }
+public record Autohaus(String nachname, String email) {
 }

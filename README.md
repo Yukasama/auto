@@ -157,3 +157,16 @@ Interessen [] [] []
 Nur Checkboxen: 2^3
 Mit optional Nachname: 2^4
 Mit optional Geschlecht 2^5
+
+
+### Übung 14
+@Bean -> Factory Methode
+Flyway.java -> Aufräumen und migrieren der DB
+
+V1.0__Create.sql
+V1.1__Insert.sql
+In der Reihenfolge der Versionsnummern werden die Skripte ausgeführt (Name danach irrelevant)
+
+Hikari -> Hibernate richtet sich an Hikari für Connection Pooling
+
+Bei Versionsnummer: "1" -> "" Teil der Versionsnummer

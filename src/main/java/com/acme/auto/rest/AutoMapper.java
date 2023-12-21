@@ -20,6 +20,7 @@ interface AutoMapper {
      * @return Konvertiertes Auto-Objekt mit null als ID
      */
     @Mapping(target = "id", ignore = true)
+    @Mapping(target = "version", ignore = true)
     @Mapping(target = "featuresStr", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)

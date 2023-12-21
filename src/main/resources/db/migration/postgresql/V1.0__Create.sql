@@ -7,6 +7,7 @@ CREATE INDEX IF NOT EXISTS besitzer_nachname_idx ON besitzer(nachname);
 
 CREATE TABLE IF NOT EXISTS auto (
     id             UUID PRIMARY KEY,
+    version        INTEGER NOT NULL DEFAULT 0,
     name           VARCHAR(50) NOT NULL,
     marke          VARCHAR(10) CHECK (marke ~ 'VOLKSWAGEN|MERCEDES|FORD|TESLA'),
     kennzeichen    VARCHAR(10) NOT NULL CHECK (kennzeichen ~ '^[A-ZÄÖÜ]{1,3}-[A-Z]{1,2}-[1-9]\d{0,3}E?'),

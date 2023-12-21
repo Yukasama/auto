@@ -20,7 +20,8 @@ type Mutation {
 
 "Schema eines Autos"
 type Auto {
-  id: ID
+  id: ID!
+  version: Int!
   name: String!
   marke: String!
   kennzeichen: String!

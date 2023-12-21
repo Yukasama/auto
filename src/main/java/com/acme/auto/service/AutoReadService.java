@@ -65,6 +65,11 @@ public class AutoReadService {
         return autos;
     }
 
+    /**
+     * Ausgelagerte Methode für die Rückgabe von Autos bei nur einem Suchkriterium
+     * @param suchkriterien Suchkriterium
+     * @return Auto-Objekt entsprechend dem Suchkriterium
+     */
     private Collection<Auto> findSingleCriteria(final Map<String, List<String>> suchkriterien) {
         final var namen = suchkriterien.get("name");
         if (namen != null && namen.size() == 1) {

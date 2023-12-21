@@ -12,27 +12,23 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+package com.acme.auto.service;
 
-package com.acme.auto.dev;
-
-import org.springframework.context.annotation.Profile;
-import static com.acme.auto.dev.DevConfig.DEV;
+import lombok.Getter;
 
 /**
- * Konfigurationsklasse für die Anwendung bzw. den Microservice, falls das Profile _dev_ aktiviert ist.
+ * Exception, falls die Versionsnummer nicht aktuell ist.
  *
  * @author <a href="mailto:Juergen.Zimmermann@h-ka.de">Jürgen Zimmermann</a>
  */
-@Profile(DEV)
-@SuppressWarnings({"ClassNamePrefixedWithPackageName", "HideUtilityClassConstructor"})
-public class DevConfig implements Flyway, LogRequestHeaders, K8s {
-    /**
-     * Konstante für das Spring-Profile "dev".
-     */
-    public static final String DEV = "dev";
+@Getter
+public class VersionOutdatedException extends RuntimeException {
+    private final int version;
 
-    DevConfig() {
+    VersionOutdatedException(final int version) {
+        super(STR."Die Versionsnummer \{version} ist veraltet.");
+        this.version = version;
     }
 }

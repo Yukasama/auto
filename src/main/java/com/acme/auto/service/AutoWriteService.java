@@ -55,10 +55,11 @@ public class AutoWriteService {
      * @param id ID des zu aktualisierenden Autos
      * @throws ConstraintViolationsException Falls mindestens ein Constraint verletzt ist.
      * @throws NotFoundException Kein Auto zur ID vorhanden.
+     * @throws VersionOutdatedException Versionsnummer ist veraltet.
      * @throws KennzeichenExistsException Es gibt bereits ein Auto mit diesem Kennzeichen.
      */
     @Transactional
-    public void update(final Auto auto, final UUID id) {
+    public Auto update(final Auto auto, final UUID id, final int version) {
         log.debug("update: auto={} id={}", auto, id);
 
         final var violations = validator.validate(auto);
@@ -72,8 +73,14 @@ public class AutoWriteService {
             throw new NotFoundException(id);
         }
 
-        final var kennzeichen = auto.getKennzeichen();
         var autoDB = autoDBOpt.get();
+        final var versionDB = autoDB.getVersion();
+        if (version != versionDB) {
+            log.debug("update: Versionsnummern req={} db={} stimmt nicht überein.", version, versionDB);
+            throw new VersionOutdatedException(version);
+        }
+
+        final var kennzeichen = auto.getKennzeichen();
         if (!autoDB.getKennzeichen().equals(kennzeichen) && repo.existsByKennzeichen(kennzeichen)) {
             log.debug("update: Kennzeichen {} existiert bereits.", kennzeichen);
             throw new KennzeichenExistsException(kennzeichen);
@@ -82,6 +89,7 @@ public class AutoWriteService {
         autoDB.set(auto);
         autoDB = repo.save(auto);
         log.debug("update: {} -> {}", autoDB, auto);
+        return autoDB;
     }
 
     public void delete(final UUID id) {
