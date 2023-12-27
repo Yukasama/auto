@@ -1,0 +1,6 @@
+services:
+  auto:
+    volumes:
+      - type: bind
+        source: /Users/yukasama/volumes/auto
+        target: /tmp
