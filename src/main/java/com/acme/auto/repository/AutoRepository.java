@@ -34,6 +34,14 @@ public interface AutoRepository extends JpaRepository<Auto, UUID>, JpaSpecificat
     Optional<Auto> findById(@NonNull UUID id);
 
     /**
+     * Alle Autos in einem Autohaus finden.
+     * @param autohausId ID des Autohauses.
+     * @return Alle Autos im Autohaus.
+     */
+    @EntityGraph(attributePaths = {"besitzer", "reparaturen"})
+    List<Auto> findByAutohausId(UUID autohausId);
+
+    /**
      * Auto anhand des Namen suchen
      * @param name Name des Autos
      * @return Alle gefundenen Autos

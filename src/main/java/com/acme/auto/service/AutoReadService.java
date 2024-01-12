@@ -1,12 +1,17 @@
 package com.acme.auto.service;
 
 import com.acme.auto.entity.Auto;
+import com.acme.auto.repository.Autohaus;
+import com.acme.auto.repository.AutohausRepository;
 import com.acme.auto.repository.SpecificationBuilder;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import com.acme.auto.repository.AutoRepository;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.HttpStatusCodeException;
+import java.net.URI;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -21,6 +26,7 @@ import java.util.UUID;
 @Slf4j
 public class AutoReadService {
     private final AutoRepository repo;
+    private final AutohausRepository autohausRepo;
     private final SpecificationBuilder specBuilder;
 
     /**
@@ -33,6 +39,13 @@ public class AutoReadService {
         log.debug("findById: id={}", id);
         final var auto = repo.findById(id)
             .orElseThrow(() -> new NotFoundException(id));
+
+        final var autohausName = findAutohausById(auto.getAutohausId()).name();
+        auto.setAutohausName(autohausName);
+
+        final var autohausHomePage = findAutohausById(auto.getAutohausId()).homepage();
+        auto.setAutohausHomepage(autohausHomePage);
+
         log.debug("findById: {}", auto);
         return auto;
     }
@@ -101,6 +114,40 @@ public class AutoReadService {
             return autos;
         }
 
+        final var autohausIds = suchkriterien.get("autohausId");
+        if (autohausIds != null && autohausIds.size() == 1) {
+            final UUID autohausId = UUID.fromString(autohausIds.getFirst());
+            final var autos = repo.findByAutohausId(autohausId);
+            if(autos.isEmpty()) {
+                throw new NotFoundException(suchkriterien);
+            }
+            final var autohaus = autohausRepo.getById(autohausId.toString());
+            autos.forEach(auto -> {
+                auto.setAutohausName(autohaus.name());
+                auto.setAutohausHomepage(autohaus.homepage());
+            });
+            log.debug("find (autohausId): {}", autos);
+            return autos;
+        }
+
         throw new NotFoundException(suchkriterien);
+    }
+
+    private Autohaus findAutohausById(final UUID autohausId) {
+        log.debug("findAutohausById: autohausId={}", autohausId);
+
+        final Autohaus autohaus;
+        try {
+            autohaus = autohausRepo.getById(autohausId.toString());
+        } catch (final HttpClientErrorException.NotFound ex) {
+            log.debug("findAutohausById: HttpClientErrorException.NotFound");
+            return new Autohaus("N/A", URI.create("not-found.com"));
+        } catch (final HttpStatusCodeException ex) {
+            log.debug("findAutohausById", ex);
+            return new Autohaus("Exception", URI.create("exception.com"));
+        }
+
+        log.debug("findAutohausById: {}", autohaus);
+        return autohaus;
     }
 }

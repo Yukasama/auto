@@ -11,7 +11,9 @@ import lombok.ToString;
 import org.springframework.hateoas.RepresentationModel;
 import org.springframework.hateoas.server.core.Relation;
 import java.math.BigDecimal;
+import java.net.URI;
 import java.util.List;
+import java.util.UUID;
 
 /**
  * Model-Klasse für Spring HATEOAS, um Links im Response-Body hinzuzufügen
@@ -21,6 +23,7 @@ import java.util.List;
 @Getter @Setter
 @ToString(callSuper = true)
 class AutoModel extends RepresentationModel<AutoModel> {
+    private final UUID autohausId;
     private final String name;
     private final MarkeType marke;
 
@@ -32,7 +35,11 @@ class AutoModel extends RepresentationModel<AutoModel> {
     private List<FeatureType> features;
     private Besitzer besitzer;
 
+    private String autohausName;
+    private URI autohausHomepage;
+
     AutoModel(final Auto auto) {
+        autohausId = auto.getAutohausId();
         name = auto.getName();
         marke = auto.getMarke();
         kennzeichen = auto.getKennzeichen();
@@ -40,5 +47,7 @@ class AutoModel extends RepresentationModel<AutoModel> {
         preis = auto.getPreis();
         features = auto.getFeatures();
         besitzer = auto.getBesitzer();
+        autohausName = auto.getAutohausName();
+        autohausHomepage = auto.getAutohausHomepage();
     }
 }

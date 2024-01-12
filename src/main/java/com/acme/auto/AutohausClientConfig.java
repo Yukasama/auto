@@ -80,7 +80,7 @@ interface AutohausClientConfig {
         return proxyFactory.createClient(AutohausRepository.class);
     }
 
-    // siehe org.springframework.graphql.client.DefaultHttpGraphQlClientBuilder.DefaultHttpGraphQlClient
+/*    // siehe org.springframework.graphql.client.DefaultHttpGraphQlClientBuilder.DefaultHttpGraphQlClient
     @Bean
     default HttpGraphQlClient graphQlClient(
         final UriComponentsBuilder uriComponentsBuilder,
@@ -102,5 +102,5 @@ interface AutohausClientConfig {
             .apply(ssl.fromBundle("microservice"))
             .build();
         return HttpGraphQlClient.builder(webClient).build();
-    }
+    }*/
 }

@@ -1,6 +1,7 @@
 package com.acme.auto.entity;
 
 import java.math.BigDecimal;
+import java.net.URI;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
@@ -64,6 +65,9 @@ public class Auto {
     @Id
     @GeneratedValue
     private UUID id;
+
+    @Column(name = "autohaus_id")
+    private UUID autohausId;
 
     /**
      * Versionsnummer für optimistische Synchronisierung
@@ -192,4 +196,10 @@ public class Auto {
             .map(FeatureType::valueOf)
             .toList();
     }
+
+    @Transient
+    private String autohausName;
+
+    @Transient
+    private URI autohausHomepage;
 }

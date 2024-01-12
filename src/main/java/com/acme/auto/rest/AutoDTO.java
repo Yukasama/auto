@@ -4,6 +4,7 @@ import com.acme.auto.entity.FeatureType;
 import com.acme.auto.entity.MarkeType;
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.UUID;
 
 /**
  * ValueObject für das Neuanlegen und Ändern eines neues Autos.
@@ -17,6 +18,7 @@ import java.util.List;
  * @param reparaturen Reparaturen des Autos als DTO
  */
 record AutoDTO (
+    UUID autohausId,
     String name,
     MarkeType marke,
     String kennzeichen,

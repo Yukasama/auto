@@ -7,6 +7,7 @@ CREATE INDEX IF NOT EXISTS besitzer_nachname_idx ON besitzer(nachname);
 
 CREATE TABLE IF NOT EXISTS auto (
     id             UUID PRIMARY KEY,
+    autohausId     UUID NOT NULL,
     version        INTEGER NOT NULL DEFAULT 0,
     name           VARCHAR(50) NOT NULL,
     marke          VARCHAR(10) CHECK (marke ~ 'VOLKSWAGEN|MERCEDES|FORD|TESLA'),

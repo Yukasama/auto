@@ -24,7 +24,7 @@ import org.springframework.aot.hint.RuntimeHintsRegistrar;
  *
  * @author <a href="mailto:Juergen.Zimmermann@h-ka.de">Jürgen Zimmermann</a>
  */
-final class ApplicationConfig implements SecurityConfig {
+final class ApplicationConfig implements SecurityConfig, AutohausClientConfig {
     ApplicationConfig() {
     }
 
