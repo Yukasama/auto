@@ -1,0 +1,36 @@
+services:
+  db:
+    volumes:
+      - type: bind
+        source: /Users/yukasama/volumes/postgres/data
+        target: /var/lib/postgresql/data
+      - type: bind
+        source: /Users/yukasama/volumes/postgres/postgresql.conf
+        target: /etc/postgresql/postgresql.conf
+        read_only: true
+      - type: bind
+        source: /Users/yukasama/volumes/postgres/tablespace
+        target: /var/lib/postgresql/tablespace
+      - type: bind
+        source: /Users/yukasama/volumes/postgres/tls/key.pem
+        target: /var/lib/postgresql/key.pem
+        read_only: true
+      - type: bind
+        source: /Users/yukasama/volumes/postgres/tls/certificate.crt
+        target: /var/lib/postgresql/certificate.crt
+        read_only: true
+      # - type: bind
+      #   source: /Users/yukasama/volumes/postgres/run
+      #   target: /var/run/postgresql
+      - type: bind
+        source: /Users/yukasama/volumes/postgres/sql
+        target: /sql
+        read_only: true
+  pgadmin:
+    volumes:
+      - type: bind
+        source: /Users/yukasama/volumes/postgres/pgadmin
+        target: /var/lib/pgadmin
+      - type: bind
+        source: /Users/yukasama/volumes/postgres/pgadmin4
+        target: /var/lib/pgadmin4

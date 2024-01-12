@@ -59,10 +59,10 @@ services:
         source: C:/Zimmermann/volumes/postgres/tls/certificate.crt
         target: /var/lib/postgresql/certificate.crt
         read_only: true
-      - type: bind
-        source: C:/Zimmermann/volumes/postgres/run
-        # .s.PGSQL.5432.lock
-        target: /var/run/postgresql
+      # - type: bind
+      #   source: C:/Zimmermann/volumes/postgres/run
+      #   # .s.PGSQL.5432.lock
+      #   target: /var/run/postgresql
       - type: bind
         source: C:/Zimmermann/volumes/postgres/sql
         target: /sql
