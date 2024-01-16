@@ -22,4 +22,3 @@ data:
   TZ: Europe/Berlin
   PGTZ: Europe/Berlin
   LANG: de_DE.utf8
-  AUTOHAUS_SERVICE_SCHEMA: {{ .Values.deployment.autohausSchema }}

@@ -5,7 +5,7 @@ VALUES
     ('00000000-0000-0000-0000-100000000002', 'Hermine', 'Granger'),
     ('00000000-0000-0000-0000-100000000003', 'Albus', 'Dumbledore');
 
-INSERT INTO auto (id, autohausId, version, name, marke, kennzeichen, pferde_staerke, preis, features, besitzer_id, created_at, updated_at)
+INSERT INTO auto (id, autohaus_id, version, name, marke, kennzeichen, pferde_staerke, preis, features, besitzer_id, created_at, updated_at)
 VALUES
     ('00000000-0000-0000-0000-000000000000', '00000000-0000-0000-0000-000000000000', 0, 'VW Polo', 'VOLKSWAGEN', 'B-MX-345', 130, 10000, 'DISPLAY', '00000000-0000-0000-0000-100000000000', '2022-01-31 00:00:00', '2022-01-31 00:00:00'),
     ('00000000-0000-0000-0000-000000000001', '00000000-0000-0000-0000-000000000000', 0, 'Ford Mustang', 'FORD', 'M-AB-2849', 150, 20000, 'SPORTMODUS', '00000000-0000-0000-0000-100000000001', '2022-01-01 00:00:00', '2022-01-01 00:00:00'),

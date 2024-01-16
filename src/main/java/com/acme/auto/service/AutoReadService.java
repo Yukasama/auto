@@ -40,11 +40,11 @@ public class AutoReadService {
         final var auto = repo.findById(id)
             .orElseThrow(() -> new NotFoundException(id));
 
-        final var autohausName = findAutohausById(auto.getAutohausId()).name();
-        auto.setAutohausName(autohausName);
-
-        final var autohausHomePage = findAutohausById(auto.getAutohausId()).homepage();
-        auto.setAutohausHomepage(autohausHomePage);
+        log.debug("LHKSADLÖJSAG, {}", auto);
+        final var autohaus = findAutohausById(auto.getAutohausId());
+        log.debug("LHKSADLÖJSAG, {}", autohaus);
+        auto.setAutohausName(autohaus.name());
+        auto.setAutohausHomepage(autohaus.homepage());
 
         log.debug("findById: {}", auto);
         return auto;
@@ -136,16 +136,7 @@ public class AutoReadService {
     private Autohaus findAutohausById(final UUID autohausId) {
         log.debug("findAutohausById: autohausId={}", autohausId);
 
-        final Autohaus autohaus;
-        try {
-            autohaus = autohausRepo.getById(autohausId.toString());
-        } catch (final HttpClientErrorException.NotFound ex) {
-            log.debug("findAutohausById: HttpClientErrorException.NotFound");
-            return new Autohaus("N/A", URI.create("not-found.com"));
-        } catch (final HttpStatusCodeException ex) {
-            log.debug("findAutohausById", ex);
-            return new Autohaus("Exception", URI.create("exception.com"));
-        }
+        final var autohaus = autohausRepo.getById(autohausId.toString());
 
         log.debug("findAutohausById: {}", autohaus);
         return autohaus;

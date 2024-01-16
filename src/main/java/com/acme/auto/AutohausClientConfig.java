@@ -35,20 +35,17 @@ import org.springframework.web.util.UriComponentsBuilder;
  */
 @SuppressWarnings("java:S1075")
 interface AutohausClientConfig {
-    int AUTOHAUS_DEFAULT_PORT = 8080;
-    String GRAPHQL_PATH = "/graphql";
+    int AUTOHAUS_DEFAULT_PORT = 8081;
     Logger LOGGER = LoggerFactory.getLogger(AutohausClientConfig.class);
 
     @Bean
     @SuppressWarnings("CallToSystemGetenv")
     default UriComponentsBuilder uriComponentsBuilder() {
-        // Umgebungsvariable in Kubernetes, sonst: null
         final var autohausSchemaEnv = System.getenv("AUTOHAUS_SERVICE_SCHEMA");
         final var autohausHostEnv = System.getenv("AUTOHAUS_SERVICE_HOST");
         final var autohausPortEnv = System.getenv("AUTOHAUS_SERVICE_PORT");
 
-        // TODO URI bei Docker Compose
-        final var schema = autohausSchemaEnv == null ? "https" : autohausSchemaEnv;
+        final var schema = autohausSchemaEnv == null ? "https" : "http";
         final var host = autohausHostEnv == null ? "localhost" : autohausHostEnv;
         final int port = autohausPortEnv == null ? AUTOHAUS_DEFAULT_PORT : Integer.parseInt(autohausPortEnv);
 
@@ -70,7 +67,7 @@ interface AutohausClientConfig {
 
         final var restClient = restClientBuilder
             .baseUrl(baseUrl)
-            // siehe Property "spring.ssl.bundle.jks.microservice" in src\main\resources\application.yml
+            // siehe Property "spring.ssl.bundle.jks.microservice" in src\main\resources\application-mac.yml
             // https://docs.spring.io/spring-boot/docs/current/reference/htmlsingle/#features.ssl
             // org.springframework.boot.autoconfigure.web.client.AutoConfiguredRestClientSsl
             .apply(ssl.fromBundle("microservice"))
@@ -79,28 +76,4 @@ interface AutohausClientConfig {
         final var proxyFactory = HttpServiceProxyFactory.builderFor(clientAdapter).build();
         return proxyFactory.createClient(AutohausRepository.class);
     }
-
-/*    // siehe org.springframework.graphql.client.DefaultHttpGraphQlClientBuilder.DefaultHttpGraphQlClient
-    @Bean
-    default HttpGraphQlClient graphQlClient(
-        final UriComponentsBuilder uriComponentsBuilder,
-        final WebClient.Builder webClientBuilder,
-        final WebClientSsl ssl
-    ) {
-        final var baseUrl = uriComponentsBuilder
-            .path(GRAPHQL_PATH)
-            .build()
-            .toUriString();
-        LOGGER.info("GraphQL-Client: baseUrl={}", baseUrl);
-
-        final var webClient = webClientBuilder
-            .baseUrl(baseUrl)
-            // siehe Property "spring.ssl.bundle.jks.microservice" in src\main\resources\application.yml
-            // https://docs.spring.io/spring-boot/docs/current/reference/htmlsingle/#features.ssl
-            // https://spring.io/blog/2023/06/07/securing-spring-boot-applications-with-ssl
-            // org.springframework.boot.autoconfigure.web.reactive.function.client.AutoConfiguredWebClientSsl
-            .apply(ssl.fromBundle("microservice"))
-            .build();
-        return HttpGraphQlClient.builder(webClient).build();
-    }*/
 }

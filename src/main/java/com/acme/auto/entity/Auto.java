@@ -66,7 +66,6 @@ public class Auto {
     @GeneratedValue
     private UUID id;
 
-    @Column(name = "autohaus_id")
     private UUID autohausId;
 
     /**
