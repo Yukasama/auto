@@ -45,7 +45,7 @@ interface AutohausClientConfig {
         final var autohausHostEnv = System.getenv("AUTOHAUS_SERVICE_HOST");
         final var autohausPortEnv = System.getenv("AUTOHAUS_SERVICE_PORT");
 
-        final var schema = autohausSchemaEnv == null ? "https" : "http";
+        final var schema = autohausSchemaEnv == null ? "http" : "http";
         final var host = autohausHostEnv == null ? "localhost" : autohausHostEnv;
         final int port = autohausPortEnv == null ? AUTOHAUS_DEFAULT_PORT : Integer.parseInt(autohausPortEnv);
 

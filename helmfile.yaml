@@ -23,7 +23,7 @@ releases:
     chart: extras/kubernetes/auto
     #values: [extras/kubernetes/auto/dev.yaml]
     #values: [extras/kubernetes/auto/dev.yaml, extras/kubernetes/auto/dev-mysql.yaml]
-    values: [extras/kubernetes/auto/dev.yaml, extras/kubernetes/auto/dev-h2.yaml]
+    values: [extras/kubernetes/auto/dev.yaml]
     # Fortio:
     #values: [extras/kubernetes/auto/dev.yaml, extras/kubernetes/auto/dev-fortio.yaml]
     #values: [extras/kubernetes/auto/dev.yaml, extras/kubernetes/auto/dev-mysql.yaml, extras/kubernetes/auto/dev-fortio.yaml]

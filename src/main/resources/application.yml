@@ -58,7 +58,7 @@ spring:
       naming.physical-strategy: org.hibernate.boot.model.naming.CamelCaseToUnderscoresNamingStrategy
     open-in-view: false
     properties:
-      # https://docs.jboss.org/hibernate/orm/current/javadocs/org/hibernate/cfg/AvailableSettings.html
+      # https://docs.jboss.org/hibernate/orm/currentfl/javadocs/org/hibernate/cfg/AvailableSettings.html
       # https://docs.jboss.org/hibernate/orm/current/javadocs/org/hibernate/cfg/Environment.html
       hibernate:
         #default_schema: auto

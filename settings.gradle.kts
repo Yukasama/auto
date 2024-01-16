@@ -7,16 +7,12 @@ pluginManagement {
 
         maven("https://repo.spring.io/milestone")
 
-        // Snapshots von Spring Framework, Spring Boot, ...
-        // maven("https://repo.spring.io/snapshot") { mavenContent { snapshotsOnly() } }
-        // maven("https://repo.spring.io/plugins-release")
+        // Snapshot von Spring Boot, ...
+        //maven("https://repo.spring.io/snapshot") { mavenContent { snapshotsOnly() } }
+        //maven("https://repo.spring.io/plugins-release")
     }
 }
 
-// buildCache {
-//    local {
-//        directory = "C:/Z/caches"
-//    }
-// }
+// buildCache { local { directory = "C:/Z/caches" } }
 
 rootProject.name = "auto"

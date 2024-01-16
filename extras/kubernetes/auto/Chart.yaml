@@ -36,12 +36,12 @@ type: application
 # This is the chart version. This version number should be incremented each time you make changes
 # to the chart and its templates, including the app version.
 # Versions are expected to follow Semantic Versioning (https://semver.org/)
-version: 2023.10.0
+version: 2023.10.1
 
 # This is the version number of the application being deployed. This version number should be
 # incremented each time you make changes to the application. Versions are not expected to
 # follow Semantic Versioning. They should reflect the version the application is using.
-appVersion: 2023.10.0-buildpacks
+appVersion: 2023.10.1-buildpacks
 #appVersion: 2023.10.0-eclipse
 #appVersion: 2023.10.0-azul
 #appVersion: 2023.10.0-buildpacks-eclipse
@@ -59,8 +59,3 @@ keywords:
 
 home: https://www.www.h-ka.de
 icon: https://www.www.h-ka.de/typo3conf/ext/in2template/Resources/Public/Images/Favicons/favicon-256x256.png
-
-maintainers:
-  - name: Jürgen Zimmermann
-    email: Juergen.Zimmermann@h-ka.de
-    url: https://www.h-ka.de

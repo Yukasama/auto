@@ -115,7 +115,7 @@ autoscaling:
   memoryUtilizationPercentage: 80
 
 datasource:
-  url: jdbc:postgresql://localhost/auto
+  url: jdbc:postgresql://postgres/auto?sslmode=verify-ca&sslrootcert=/workspace/BOOT-INF/classes/certificate.crt
   username: auto
   password: Change Me!
 

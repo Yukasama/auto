@@ -33,7 +33,7 @@
 //        .\gradlew jacocoTestCoverageVerification
 //        .\gradlew allureServe
 //              EINMALIG>>   .\gradlew downloadAllure
-//        .\gradlew checkstyleMain checkstyleTest spotbugsMain spotbugsTest spotlessApply
+//        .\gradlew checkstyleMain checkstyleTest spotbugsMain spotbugsTest spotlessApply modernizer
 //        .\gradlew sonar
 //        .\gradlew buildHealth
 //        .\gradlew reason --id com.fasterxml.jackson.core:jackson-annotations:...
@@ -50,7 +50,7 @@
 //  6) API-Dokumentation erstellen
 //        .\gradlew javadoc
 //
-//  7) Entwicklerhandbuch in "Software Engineering" erstellen
+//  7) Entwicklerhandbuch erstellen
 //        .\gradlew asciidoctor asciidoctorPdf
 //
 //  8) Projektreport erstellen
@@ -76,12 +76,12 @@
 //  13) Native Compilation mit Spring AOT (= Ahead Of Time) in einer Eingabeaufforderung
 //        "C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\VC\Auxiliary\Build\vcvars64.bat"
 //        .\gradlew nativeCompile
-//        .\build\native\nativeCompile\kunde.exe --spring.profiles.active=dev --logging.file.name=.\build\log\application.log
-//        .\build\native\nativeCompile\kunde.exe --spring.datasource.url=jdbc:h2:mem:testdb --spring.datasource.username=sa --spring.datasource.password="" --logging.file.name=.\build\log\application.log
+//        .\build\native\nativeCompile\auto.exe --spring.profiles.active=dev --logging.file.name=.\build\log\application.log
+//        .\build\native\nativeCompile\auto.exe --spring.datasource.url=jdbc:h2:mem:testdb --spring.datasource.username=sa --spring.datasource.password="" --logging.file.name=.\build\log\application.log
 //
 //  14) Initialisierung des Gradle Wrappers in der richtigen Version
 //      dazu ist ggf. eine Internetverbindung erforderlich
-//        gradle wrapper --gradle-version=8.6-milestone-1 --distribution-type=bin
+//        gradle wrapper --gradle-version=8.6-rc-1 --distribution-type=bin
 
 // https://github.com/gradle/kotlin-dsl/tree/master/samples
 // https://docs.gradle.org/current/userguide/kotlin_dsl.html
@@ -92,7 +92,9 @@ import java.nio.file.Paths
 import net.ltgt.gradle.errorprone.errorprone
 
 val javaVersion: String = System.getProperty("java") ?: libs.versions.javaVersion.get()
+val javaLanguageVersion: String = System.getProperty("javaLanguageVersion") ?: libs.versions.javaLanguageVersion.get()
 
+// alternativ:   project.findProperty("...")
 val imagePath = project.properties["imagePath"] ?: "juergenzimmermann"
 val enablePreview = if (project.properties["enablePreview"] == false) null else "--enable-preview"
 val alternativeBuildpack = project.properties["buildpack"]
@@ -100,7 +102,6 @@ val alternativeBuildpack = project.properties["buildpack"]
 val mapStructVerbose = project.properties["mapStructVerbose"] == "true" || project.properties["mapStructVerbose"] == "TRUE"
 val useTracing = project.properties["tracingZipkin"] != "false" && project.properties["tracingZipkin"] != "FALSE"
 val activeProfiles = if (project.properties["https"] != "false" && project.properties["https"] != "FALSE") "dev" else "dev,http"
-val useFlyway = project.properties["flyway"] != "false" && project.properties["flyway"] != "FALSE"
 
 plugins {
     java
@@ -111,6 +112,10 @@ plugins {
 
     // https://plugins.gradle.org
 
+    // https://docs.spring.io/spring-boot/docs/current/gradle-plugin/reference/htmlsingle
+    // https://docs.spring.io/spring-boot/docs/current/gradle-plugin/reference/htmlsingle/#reacting-to-other-plugins.java
+    // https://docs.spring.io/spring-boot/docs/current/gradle-plugin/reference/htmlsingle/#packaging-executable
+    // https://docs.spring.io/spring-boot/docs/current/gradle-plugin/reference/htmlsingle/#build-image
     id("org.springframework.boot") version libs.versions.springBootPlugin.get()
 
     // Spring AOT: Kommentar entfernen
@@ -125,6 +130,9 @@ plugins {
 
     // https://github.com/diffplug/spotless
     id("com.diffplug.spotless") version libs.versions.spotless.get()
+
+    // https://github.com/andygoossens/gradle-modernizer-plugin
+    id("com.github.andygoossens.modernizer") version libs.versions.modernizerPlugin.get()
 
     // https://docs.sonarqube.org/latest/analyzing-source-code/scanners/sonarscanner-for-gradle
     id("org.sonarqube") version libs.versions.sonarqube.get()
@@ -184,7 +192,7 @@ version = "2023.10.0"
 val imageTag = project.properties["imageTag"] ?: project.version.toString()
 
 sweeney {
-    enforce(mapOf("type" to "gradle", "expect" to "[8.5,8.5]"))
+    enforce(mapOf("type" to "gradle", "expect" to "[8.6,8.6]"))
     // https://www.java.com/releases
     // https://devcenter.heroku.com/articles/java-support#specifying-a-java-version
     enforce(mapOf("type" to "jdk", "expect" to "[21.0.1,21.0.1]"))
@@ -198,7 +206,7 @@ java {
     // GraalVM unterstuetzt nicht toolchain: deshalb auskommentieren sowie Kommentare bei sourceCompatibility und targetCompatibility entfernen
     toolchain {
         // einschl. sourceCompatibility und targetCompatibility
-        languageVersion = JavaLanguageVersion.of(libs.versions.javaLanguageVersion.get())
+        languageVersion = JavaLanguageVersion.of(javaLanguageVersion)
     }
     // sourceCompatibility = JavaVersion.toVersion(javaVersion)
     // targetCompatibility = sourceCompatibility
@@ -215,9 +223,7 @@ repositories {
     if (libs.versions.springBoot.get().endsWith("-SNAPSHOT")) {
         maven("https://repo.spring.io/snapshot") { mavenContent { snapshotsOnly() } }
     }
-    //if (libs.versions.spring.get().endsWith("-SNAPSHOT") || libs.versions.springBoot.get().endsWith("-SNAPSHOT")) {
-    //    maven("https://repo.spring.io/snapshot") { mavenContent { snapshotsOnly() } }
-    //}
+    //maven("https://repo.spring.io/snapshot") { mavenContent { snapshotsOnly() } }
 
     // Snapshots von Lombok: https://projectlombok.org/download-edge
     if (libs.versions.lombok.get() == "edge-SNAPSHOT") {
@@ -225,9 +231,7 @@ repositories {
     }
 
     // Snapshots von Hibernate
-    //if (libs.versions.hibernate.get().endsWith("-SNAPSHOT")) {
-    //    maven("https://oss.sonatype.org/content/repositories/snapshots") { mavenContent { snapshotsOnly() } }
-    //}
+    //maven("https://oss.sonatype.org/content/repositories/snapshots") { mavenContent { snapshotsOnly() } }
 
     // Snapshots von springdoc-openapi
     if (libs.versions.springdocOpenapi.get().endsWith("-SNAPSHOT")) {
@@ -261,33 +265,39 @@ configurations.checkstyle {
 @Suppress("CommentSpacing")
 // https://docs.gradle.org/current/userguide/java_library_plugin.html#sec:java_library_separation
 dependencies {
-    //implementation(platform("io.micrometer:micrometer-bom:${libs.versions.micrometer.get()}"))
+    implementation("org.apache.logging.log4j:log4j-bom:${libs.versions.log4j2.get()}")
+    implementation(platform("io.micrometer:micrometer-bom:${libs.versions.micrometer.get()}"))
     implementation(platform("com.fasterxml.jackson:jackson-bom:${libs.versions.jackson.get()}"))
     //implementation(platform("io.netty:netty-bom:${libs.versions.netty.get()}"))
-    //implementation(platform("io.projectreactor:reactor-bom:${libs.versions.reactor.get()}"))
-    //implementation(platform("org.springframework:spring-framework-bom:${libs.versions.spring.get()}"))
+    implementation(platform("io.projectreactor:reactor-bom:${libs.versions.reactorBom.get()}"))
+    implementation(platform("org.springframework:spring-framework-bom:${libs.versions.springFramework.get()}"))
     //implementation(platform("org.springframework.data:spring-data-bom:${libs.versions.springData.get()}"))
-    //implementation(platform("org.springframework.security:spring-security-bom:${libs.versions.springSecurity.get()}"))
+    implementation(platform("org.springframework.security:spring-security-bom:${libs.versions.springSecurity.get()}"))
     implementation(platform("io.zipkin.reporter2:zipkin-reporter-bom:${libs.versions.zipkinReporter.get()}"))
 
-    //testImplementation(platform("org.assertj:assertj-bom:${libs.versions.assertj.get()}"))
+    testImplementation(platform("org.assertj:assertj-bom:${libs.versions.assertj.get()}"))
     testImplementation(platform("org.mockito:mockito-bom:${libs.versions.mockito.get()}"))
-    //testImplementation(platform("org.junit:junit-bom:${libs.versions.junit.get()}"))
+    //testImplementation(platform("org.junit:junit-bom:${libs.versions.junitJupiter.get()}"))
     testImplementation(platform("io.qameta.allure:allure-bom:${libs.versions.allureBom.get()}"))
 
-    implementation(platform("org.springframework.boot:spring-boot-starter-parent:${libs.versions.springBoot.get()}"))
+    implementation(platform("org.springframework.boot:spring-boot-starter-parent:${libs.versions.springBoot.get()}")) // NOSONAR
     // spring-boot-starter-parent als "Parent POM"
     implementation(platform("org.springdoc:springdoc-openapi:${libs.versions.springdocOpenapi.get()}"))
 
-    // "Starters" enthalten sinnvolle Abhaengigkeiten, die man i.a. benoetigt
-    // spring-boot-starter beinhaltet Spring Boot mit Actuator sowie spring-boot-starter-logging mit Logback
-    implementation("org.springframework.boot:spring-boot-starter")
+    // https://docs.jboss.org/hibernate/orm/current/userguide/html_single/Hibernate_User_Guide.html#tooling-modelgen
+    // https://docs.jboss.org/hibernate/orm/current/introduction/html_single/Hibernate_Introduction.html#generator
+    // build\generated\sources\annotationProcessor\java\main\com.acme.auto\entity\Auto_.java
+    annotationProcessor("org.hibernate:hibernate-jpamodelgen:${libs.versions.hibernateJpamodelgen.get()}")
+    annotationProcessor("org.projectlombok:lombok:${libs.versions.lombok.get()}")
+    annotationProcessor("org.mapstruct:mapstruct-processor:${libs.versions.mapstruct.get()}")
+    annotationProcessor("org.projectlombok:lombok-mapstruct-binding:${libs.versions.lombokMapstructBinding.get()}")
 
-    // spring-boot-starter-hateoas enthaelt spring-boot-starter-web und dieses enthaelt spring-boot-starter-tomcat
-    implementation("org.springframework.boot:spring-boot-starter-tomcat") {
+    // "Starters" enthalten sinnvolle Abhaengigkeiten, die man i.a. benoetigt
+    // spring-boot-starter-web verwendet spring-boot-starter, spring-boot-starter-tomcat, spring-boot-starter-json
+    // spring-boot-starter verwendet spring-boot-starter-logging mit Logback
+    implementation("org.springframework.boot:spring-boot-starter-web") {
         exclude(group = "org.apache.tomcat.embed", module = "tomcat-embed-websocket")
     }
-    implementation("org.springframework.boot:spring-boot-starter-web")
     // HttpGraphQlClient benoetigt WebClient mit Project Reactor
     implementation("org.springframework.boot:spring-boot-starter-webflux")
     implementation("org.springframework.boot:spring-boot-starter-json")
@@ -295,30 +305,22 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-hateoas")
     implementation("org.springframework.boot:spring-boot-starter-validation")
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
-    // implementation(libs.crac)
 
     runtimeOnly("org.postgresql:postgresql")
     runtimeOnly("com.mysql:mysql-connector-j")
     runtimeOnly("com.oracle.database.jdbc:ojdbc11")
     runtimeOnly("com.h2database:h2")
 
-    // https://docs.jboss.org/hibernate/orm/current/userguide/html_single/Hibernate_User_Guide.html#tooling-modelgen
-    // https://docs.jboss.org/hibernate/orm/current/introduction/html_single/Hibernate_Introduction.html#generator
-    // build\generated\sources\annotationProcessor\java\main\com.acme.kunde\entity\Kunde_.java
-    annotationProcessor("org.hibernate:hibernate-jpamodelgen:${libs.versions.hibernateJpamodelgen.get()}")
-
     // Flyway unterstuetzt nur Oracle 21 in der lizenzpflichtigen Version: https://documentation.red-gate.com/fd/oracle-184127602.html
     // org.flywaydb.core.internal.database.DatabaseTypeRegister.getDatabaseTypeForConnection()
-    if (useFlyway) {
-        implementation("org.flywaydb:flyway-core")
-        // https://documentation.red-gate.com/flyway/learn-more-about-flyway/system-requirements/supported-databases-for-flyway
-        // https://documentation.red-gate.com/fd/postgresql-184127604.html
-        // https://github.com/flyway/flyway/blob/main/flyway-core/src/main/java/org/flywaydb/core/internal/database/DatabaseTypeRegister.java#L99
-        runtimeOnly("org.flywaydb:flyway-database-postgresql")
-        runtimeOnly("org.flywaydb:flyway-database-oracle")
-        // https://flywaydb.org/documentation/database/mysql#java-usage
-        runtimeOnly("org.flywaydb:flyway-mysql")
-    }
+    implementation("org.flywaydb:flyway-core")
+    // https://documentation.red-gate.com/flyway/learn-more-about-flyway/system-requirements/supported-databases-for-flyway
+    // https://documentation.red-gate.com/fd/postgresql-184127604.html
+    // https://github.com/flyway/flyway/blob/main/flyway-core/src/main/java/org/flywaydb/core/internal/database/DatabaseTypeRegister.java#L99
+    runtimeOnly("org.flywaydb:flyway-database-postgresql")
+    runtimeOnly("org.flywaydb:flyway-database-oracle")
+    // https://flywaydb.org/documentation/database/mysql#java-usage
+    runtimeOnly("org.flywaydb:flyway-mysql")
 
     implementation("org.springframework.boot:spring-boot-starter-security")
     implementation("org.springframework.security:spring-security-crypto")
@@ -327,6 +329,9 @@ dependencies {
 
     // Tracing durch Micrometer und Visualisierung durch Zipkin
     if (useTracing) {
+        println("")
+        println("Tracing mit Zipkin aktiviert")
+        println("")
         implementation("io.micrometer:micrometer-tracing-bridge-brave")
         implementation("io.zipkin.reporter2:zipkin-reporter-brave")
     }
@@ -340,15 +345,12 @@ dependencies {
     // https://github.com/CRaC/example-spring-boot
     // https://github.com/sdeleuze/spring-boot-crac-demo
     if (project.properties["crac"] == true) {
+        println("CRaC aktiviert")
         implementation("org.crac:crac:${libs.versions.crac.get()}")
     }
 
     compileOnly("org.projectlombok:lombok")
-    annotationProcessor("org.projectlombok:lombok:${libs.versions.lombok.get()}")
-
     implementation("org.mapstruct:mapstruct:${libs.versions.mapstruct.get()}")
-    annotationProcessor("org.mapstruct:mapstruct-processor:${libs.versions.mapstruct.get()}")
-    annotationProcessor("org.projectlombok:lombok-mapstruct-binding:${libs.versions.lombokMapstructBinding.get()}")
 
     // https://springdoc.org/v2/#swagger-ui-configuration
     // https://github.com/springdoc/springdoc-openapi
@@ -360,11 +362,14 @@ dependencies {
     runtimeOnly("org.bouncycastle:bcpkix-jdk18on:${libs.versions.bouncycastle.get()}") // Argon2
 
     compileOnly("com.github.spotbugs:spotbugs-annotations:${libs.versions.spotbugs.get()}")
+    testCompileOnly("com.github.spotbugs:spotbugs-annotations:${libs.versions.spotbugs.get()}")
+    testImplementation("org.gaul:modernizer-maven-annotations:${libs.versions.modernizer.get()}")
 
     // https://docs.spring.io/spring-boot/docs/current/reference/htmlsingle/#using-boot-devtools
     developmentOnly("org.springframework.boot:spring-boot-devtools:${libs.versions.springBoot.get()}")
     // https://docs.spring.io/spring-boot/docs/current/reference/html/features.html#features.docker-compose
     if (project.properties["dockerCompose"] == "true") {
+        println("spring-boot-docker-compose aktiviert")
         developmentOnly("org.springframework.boot:spring-boot-docker-compose")
     }
 
@@ -386,37 +391,39 @@ dependencies {
     errorprone("com.google.errorprone:error_prone_core:${libs.versions.errorprone.get()}")
 
     constraints {
-        implementation("org.jetbrains:annotations:${libs.versions.annotations.get()}")
-        //implementation("org.springframework.graphql:spring-graphql:${libs.versions.springGraphQL.get()}")
-        //implementation("org.springframework.hateoas:spring-hateoas:${libs.versions.springHateoas.get()}")
-        //implementation("jakarta.persistence:jakarta.persistence-api:${libs.versions.jakartaPersistence.get()}")
-        implementation("org.hibernate.orm:hibernate-core:${libs.versions.hibernate.get()}")
-        runtimeOnly("org.postgresql:postgresql:${libs.versions.postgres.get()}")
-        runtimeOnly("com.mysql:mysql-connector-j:${libs.versions.mysql.get()}")
-        //runtimeOnly("com.oracle.database.jdbc:ojdbc11:${libs.versions.oracle.get()}")
-        //runtimeOnly("com.h2database:h2:${libs.versions.h2.get()}")
-        if (useFlyway) {
-            implementation("org.flywaydb:flyway-core:${libs.versions.flyway.get()}")
-            runtimeOnly("org.flywaydb:flyway-database-postgresql:${libs.versions.flyway.get()}")
-            runtimeOnly("org.flywaydb:flyway-database-oracle:${libs.versions.flyway.get()}")
-            runtimeOnly("org.flywaydb:flyway-mysql:${libs.versions.flyway.get()}")
-        }
-        implementation("com.zaxxer:HikariCP:${libs.versions.hikaricp.get()}")
-        //implementation("org.hibernate.validator:hibernate-validator:${libs.versions.hibernateValidator.get()}")
         //compileOnly("org.projectlombok:lombok:${libs.versions.lombok.get()}")
-        //implementation("org.apache.tomcat.embed:tomcat-embed-core:${libs.versions.tomcat.get()}")
-        //implementation("org.apache.tomcat.embed:tomcat-embed-el:${libs.versions.tomcat.get()}")
+
+        implementation("org.slf4j:slf4j-api:${libs.versions.slf4j.get()}")
+        implementation("org.slf4j:jul-to-slf4j:${libs.versions.slf4j.get()}")
+        //implementation("ch.qos.logback:logback-classic:${libs.versions.logback.get()}")
+
+        implementation("org.jetbrains:annotations:${libs.versions.annotations.get()}")
+        implementation("org.apache.tomcat.embed:tomcat-embed-core:${libs.versions.tomcat.get()}")
+        implementation("org.apache.tomcat.embed:tomcat-embed-el:${libs.versions.tomcat.get()}")
         implementation("com.graphql-java:java-dataloader:${libs.versions.graphqlJavaDataloader.get()}")
         //implementation("com.graphql-java:graphql-java:${libs.versions.graphqlJava.get()}")
+        implementation("io.micrometer:micrometer-tracing-bridge-brave:${libs.versions.micrometerTracing.get()}")
+        //implementation("org.hibernate.validator:hibernate-validator:${libs.versions.hibernateValidator.get()}")
+
+        //implementation("org.springframework.hateoas:spring-hateoas:${libs.versions.springHateoas.get()}")
+        //implementation("org.springframework.graphql:spring-graphql:${libs.versions.springGraphQL.get()}")
+        //implementation("org.springframework.security:spring-security-rsa:${libs.versions.springSecurityRsa.get()}")
+
+        runtimeOnly("org.postgresql:postgresql:${libs.versions.postgresql.get()}")
+        runtimeOnly("com.mysql:mysql-connector-j:${libs.versions.mysql.get()}")
+        //runtimeOnly("com.oracle.database.jdbc:ojdbc11:${libs.versions.oracleDatabase.get()}")
+        //runtimeOnly("com.h2database:h2:${libs.versions.h2.get()}")
+        //implementation("jakarta.persistence:jakarta.persistence-api:${libs.versions.jakartaPersistence.get()}")
+        implementation("com.zaxxer:HikariCP:${libs.versions.hikaricp.get()}") // NOSONAR
+        //implementation("org.hibernate.orm:hibernate-core:${libs.versions.hibernate.get()}")
+
+        implementation("org.flywaydb:flyway-core:${libs.versions.flyway.get()}")
+        runtimeOnly("org.flywaydb:flyway-database-postgresql:${libs.versions.flyway.get()}")
+        runtimeOnly("org.flywaydb:flyway-database-oracle:${libs.versions.flyway.get()}")
+        runtimeOnly("org.flywaydb:flyway-mysql:${libs.versions.flyway.get()}")
+
         //implementation("org.eclipse.angus:jakarta.mail:${libs.versions.angusMail.get()}")
         //implementation("org.yaml:snakeyaml:${libs.versions.snakeyaml.get()}")
-        //implementation("org.slf4j:slf4j-api:${libs.versions.slf4j.get()}")
-        //implementation("org.slf4j:jul-to-slf4j:${libs.versions.slf4j.get()}")
-        implementation("ch.qos.logback:logback-classic:${libs.versions.logback.get()}")
-        implementation("org.apache.logging.log4j:log4j-api:${libs.versions.log4j2.get()}")
-        implementation("org.apache.logging.log4j:log4j-to-slf4j:${libs.versions.log4j2.get()}")
-        //implementation("io.micrometer:micrometer-tracing-bridge-brave:${libs.versions.micrometerTracingBridgeBrave.get()}")
-        //implementation("org.springframework.security:spring-security-rsa:${libs.versions.springSecurityRsa.get()}")
 
         allureCommandline("io.qameta.allure:allure-commandline:${libs.versions.allureCommandline.get()}")
     }
@@ -431,8 +438,6 @@ tasks.named<JavaCompile>("compileJava") {
         isDeprecation = true
         with(compilerArgs) {
             add("-Xlint:unchecked")
-            // https://github.com/spring-projects/spring-framework/wiki/Upgrading-to-Spring-Framework-6.x#parameter-name-retention
-            add("-parameters")
 
             // https://github.com/tbroyer/gradle-errorprone-plugin#jdk-16-support
             add("--add-opens")
@@ -442,7 +447,6 @@ tasks.named<JavaCompile>("compileJava") {
             if (mapStructVerbose) {
                 add("-Amapstruct.verbose=true")
             }
-            add("-Amapstruct.defaultComponentModel=spring")
             //add("-Amapstruct.unmappedTargetPolicy=ERROR")
             //add("-Amapstruct.unmappedSourcePolicy=ERROR")
 
@@ -476,10 +480,9 @@ tasks.named<JavaCompile>("compileTestJava") {
     }
 }
 
-// TODO https://github.com/spring-projects/spring-boot/issues/38718
 tasks.named("bootJar", org.springframework.boot.gradle.tasks.bundling.BootJar::class.java) {
     // in src/main/resources/
-    exclude("private-key.pem", "certificate.cer")
+    exclude("private-key.pem", "certificate.crt", ".reloadtrigger")
 
     doLast {
         println(
@@ -578,7 +581,7 @@ tasks.named("bootBuildImage", org.springframework.boot.gradle.tasks.bundling.Boo
             )
             imageName = "${imageName.get()}-eclipse"
             println("")
-            println("Buildpacks: JVM durch Eclipse Temurin (Eclipse Temurin 21 NICHT verfuegbar)")
+            println("Buildpacks: JVM durch Eclipse Temurin")
             println("")
         }
         "azul-zulu" -> {
@@ -610,7 +613,7 @@ tasks.named("bootBuildImage", org.springframework.boot.gradle.tasks.bundling.Boo
             // Bellsoft Liberica: JRE 8, 11, 17 (default, siehe buildpack.toml), 21
             // https://github.com/paketo-buildpacks/bellsoft-liberica/releases
             println("")
-            println("Buildpacks: Default = JVM durch Bellsoft Liberica")
+            println("Buildpacks: JVM durch Bellsoft Liberica (default)")
             println("")
 
             // Amazon Coretto: kein JRE
@@ -664,12 +667,27 @@ tasks.named<Test>("test") {
     systemProperty("junit.platform.output.capture.stdout", true)
     systemProperty("junit.platform.output.capture.stderr", true)
 
+    val logLevelTest = project.properties["logLevelTest"] ?: "INFO"
+    // systemProperty("logging.level.com.acme", logLevelTest)
+    systemProperty("logging.level.org.hibernate.SQL", logLevelTest)
+    systemProperty("logging.level.org.hibernate.orm.jdbc.bind", logLevelTest)
+    systemProperty("logging.level.org.flywaydb.core.internal.sqlscript.DefaultSqlScriptExecutor", logLevelTest)
+    systemProperty("logging.level.org.springframework.web.reactive.function.client.ExchangeFunctions", logLevelTest)
+    systemProperty("logging.level.org.springframework.web.service.invoker.PathVariableArgumentResolver", logLevelTest)
+    systemProperty("logging.level.org.springframework.web.service.invoker.RequestHeaderArgumentResolver", logLevelTest)
+    systemProperty("logging.level.org.springframework.web.servlet.mvc.method.annotation.HttpEntityMethodProcessor", logLevelTest)
+    systemProperty("logging.level.org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping", logLevelTest)
+
     if (enablePreview != null) {
         jvmArgs(enablePreview)
     }
 
-    if (project.properties["showTestStandardStreams"] == "true") {
+    if (project.properties["showTestStandardStreams"] == "true" || project.properties["showTestStandardStreams"] == "TRUE") {
         testLogging.showStandardStreams = true
+    }
+
+    extensions.configure(JacocoTaskExtension::class) {
+        excludes = listOf("**/entity/*_.class", "**/dev/*.class")
     }
 
     // https://docs.gradle.org/current/userguide/java_testing.html#sec:debugging_java_tests
@@ -716,21 +734,15 @@ tasks.named<JacocoReport>("jacocoTestReport") {
         html.required = true
     }
 
+    classDirectories.setFrom(classDirectories.files.map {
+        fileTree(it).matching {
+            exclude(listOf("**/entity/*_.class", "**/dev/*.class"))
+        }
+    })
+
     // https://docs.gradle.org/current/userguide/jacoco_plugin.html
     // https://github.com/gradle/gradle/pull/12626
     dependsOn(tasks.test)
-
-    // afterEvaluate gibt es nur bei getByName<> ("eager"), *NICHT* bei named<> ("lazy")
-    // https://docs.gradle.org/5.0/release-notes.html#configuration-avoidance-api-disallows-common-configuration-errors
-    //afterEvaluate {
-    //    classDirectories.setFrom(
-    //        files(
-    //            classDirectories.files.map {
-    //                fileTree(it) { exclude("**/dev/**", "**/entity/**") }
-    //            },
-    //        ),
-    //    )
-    //}
 }
 
 tasks.named<JacocoCoverageVerification>("jacocoTestCoverageVerification") {
@@ -767,6 +779,7 @@ tasks.named("spotbugsMain", com.github.spotbugs.snom.SpotBugsTask::class.java) {
 
 // https://docs.sonarqube.org/latest/analyzing-source-code/scanners/sonarscanner-for-gradle/#analyzing
 // https://docs.sonarsource.com/sonarqube/latest/analyzing-source-code/languages/java
+// https://docs.sonarsource.com/sonarqube/latest/analyzing-source-code/test-coverage/java-test-coverage/#gradle-project
 sonarqube {
     properties {
         property("sonar.organization", "Softwarearchitektur und Microservices")
@@ -774,9 +787,15 @@ sonarqube {
         property("sonar.token", project.properties["sonarToken"]!!)
         property("sonar.scm.disabled", "true")
         property("sonar.exclusions", ".allure/**/*,.gradle/**/*,.idea/**/*,build/**/*,config/**/*,extras/**/*,gradle/**/*,src/test/java/**/*,target/*,tmp/**/*")
-        property("sonar.java.source", javaVersion)
+        property("sonar.java.source", javaLanguageVersion)
         property("sonar.java.enablePreview", "true")
-        property("sonar.skipCompile", "true")
+        property("sonar.gradle.skipCompile", "true")
+
+        println("")
+        println("sonar.junit.reportPaths=${properties["sonar.junit.reportPaths"]}")
+        println("sonar.coverage.jacoco.xmlReportPaths=${properties["sonar.coverage.jacoco.xmlReportPaths"]}")
+        println("sonar.jacoco.reportPath=${properties["sonar.jacoco.reportPath"]}")
+        println("")
     }
 }
 
@@ -785,7 +804,10 @@ sonarqube {
 // cd C:\Z\caches\modules-2\files-2.1\com.h2database\h2\2.1.214\...
 // java -jar h2-2.1.214.jar
 //  Generic H2 (Embedded)
-//  JDBC URL:   jdbc:h2:tcp://localhost/C:/Zimmermann/dependency-check-data/odc
+//  JDBC URL:       jdbc:h2:tcp://localhost/C:/Zimmermann/dependency-check-data/odc
+//  Benutzername:   dcuser
+//  Passwort:       DC-Pass1337!
+//  Tabelle:        VULNERABILITY
 dependencyCheck {
     // https://github.com/dependency-check/dependency-check-gradle/blob/main/src/main/groovy/org/owasp/dependencycheck/gradle/extension/NvdExtension.groovy
     // NVD = National Vulnerability Database
@@ -798,6 +820,7 @@ dependencyCheck {
             //delay = 5000
             // default: max. 10 wiederholte Requests fuer einen Aufruf an das NVD API
             //nvdMaxRetryCount = 20
+            // https://services.nvd.nist.gov/rest/json/cves/2.0
         }
     )
 
@@ -863,7 +886,7 @@ tasks.named<Javadoc>("javadoc") {
             addStringOption("Xdoclint:none", "-quiet")
             // https://stackoverflow.com/questions/59485464/javadoc-and-enable-preview
             addBooleanOption("-enable-preview", true)
-            addStringOption("-release", libs.versions.javaLanguageVersion.get())
+            addStringOption("-release", javaLanguageVersion)
         }
 
         if (this is StandardJavadocDocletOptions) {
@@ -888,13 +911,6 @@ tasks.named("asciidoctor", org.asciidoctor.gradle.jvm.AsciidoctorTask::class) {
     setSourceDir(file(docPath))
     logDocuments = true
 
-    // https://github.com/asciidoctor/asciidoctor-gradle-plugin/issues/597#issuecomment-844352804
-    inProcess = org.asciidoctor.gradle.base.process.ProcessMode.JAVA_EXEC
-    forkOptions {
-        @Suppress("StringLiteralDuplication")
-        jvmArgs("--add-opens", "java.base/sun.nio.ch=ALL-UNNAMED", "--add-opens", "java.base/java.io=ALL-UNNAMED")
-    }
-
     doLast {
         val outputPath = Paths.get(layout.buildDirectory.asFile.get().absolutePath, "docs", "asciidoc")
         val outputFile = Paths.get(outputPath.toFile().absolutePath, "projekthandbuch.html")
@@ -918,12 +934,6 @@ tasks.named("asciidoctorPdf", org.asciidoctor.gradle.jvm.pdf.AsciidoctorPdfTask:
     setSourceDir(file(docPath))
     attributes(mapOf("pdf-page-size" to "A4"))
     logDocuments = true
-
-    // https://github.com/asciidoctor/asciidoctor-gradle-plugin/issues/597#issuecomment-844352804
-    inProcess = org.asciidoctor.gradle.base.process.ProcessMode.JAVA_EXEC
-    forkOptions {
-        jvmArgs("--add-opens", "java.base/sun.nio.ch=ALL-UNNAMED", "--add-opens", "java.base/java.io=ALL-UNNAMED")
-    }
 
     doLast {
         val outputPath = Paths.get(layout.buildDirectory.asFile.get().absolutePath, "docs", "asciidocPdf")

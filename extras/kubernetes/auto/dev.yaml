@@ -11,7 +11,11 @@
 # GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
-# along with this program.  If not, see <https://www.gnu.org/licenses/>.
+# along with this program. If not, see <https://www.gnu.org/licenses/>.
+
+datasource:
+  password: cA==
+  url: jdbc:postgresql://postgres/auto
 
 autoscaling:
   maxReplicas: 1
@@ -51,7 +55,3 @@ readinessProbe:
   period: 180
   #failureThreshold: 1
   failureThreshold: 2
-
-h2:
-  console:
-    enabled: "false"
