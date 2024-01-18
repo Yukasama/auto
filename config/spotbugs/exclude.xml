@@ -9,4 +9,13 @@
     <Match>
         <Bug pattern="UPM_UNCALLED_PRIVATE_METHOD"/>
     </Match>
+    <Match>
+        <Class name="com.acme.auto.entity.Auto_" />
+    </Match>
+    <Match>
+        <Class name="com.acme.auto.entity.Besitzer_" />
+    </Match>
+    <Match>
+        <Class name="com.acme.auto.entity.Reparatur_" />
+    </Match>
 </FindBugsFilter>

@@ -68,12 +68,9 @@ public class AutoWriteService {
             throw new ConstraintViolationsException(violations);
         }
 
-        final var autoDBOpt = repo.findById(id);
-        if (autoDBOpt.isEmpty()) {
-            throw new NotFoundException(id);
-        }
+        var autoDB = repo.findById(id)
+            .orElseThrow(() -> new NotFoundException(id));
 
-        var autoDB = autoDBOpt.get();
         final var versionDB = autoDB.getVersion();
         if (version != versionDB) {
             log.debug("update: Versionsnummern req={} db={} stimmt nicht überein.", version, versionDB);

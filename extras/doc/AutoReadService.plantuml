@@ -1,0 +1,53 @@
+@startuml AutoService
+
+skinparam classAttributeIconSize 0
+
+package java.util {
+    interface List<T>
+    interface Map<K, V>
+    class UUID
+}
+
+package org.springframework {
+    package stereotype {
+        interface Service
+    }
+
+    package transaction.annotation {
+        interface Transactional
+    }
+}
+
+
+package com.acme.auto {
+    package entity {
+        class Auto << entity >>
+
+        Auto .up[hidden].> UUID
+        Auto .up[hidden].> Service
+        Auto .up[hidden].> Transactional
+    }
+
+    package repository {
+        interface AutoRepository << control >>
+    }
+
+    package service #DDDDDD {
+        class AutoReadService << control >> << @Service >> {
+            + findById(id: UUID): Auto
+            + find(suchkriterien: Map<String, List<String>>): List<Auto>
+        }
+
+        AutoReadService o--> "1" AutoRepository : repo
+        AutoReadService .up.> Auto
+        AutoReadService .up.> UUID
+        AutoReadService .up.> List
+        AutoReadService .up.> Map
+        AutoReadService .up.> Service
+        AutoReadService ..> Transactional
+    }
+}
+
+hide empty members
+
+@enduml

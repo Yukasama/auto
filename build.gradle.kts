@@ -833,7 +833,7 @@ dependencyCheck {
         },
     )
 
-    suppressionFile = "$projectDir/config/owasp/suppression.xml"
+    suppressionFile = "$projectDir/config/owasp/suppressions.xml"
     scanConfigurations = listOf("runtimeClasspath")
     analyzedTypes = listOf("jar")
 

@@ -21,6 +21,9 @@ interface AutoInputMapper {
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "version", ignore = true)
     @Mapping(target = "featuresStr", ignore = true)
+    @Mapping(target = "autohausId", ignore = true)
+    @Mapping(target = "autohausName", ignore = true)
+    @Mapping(target = "autohausHomepage", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
     Auto toAuto(AutoInput input);

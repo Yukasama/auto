@@ -1,0 +1,92 @@
+@startuml AutoHandler
+
+skinparam classAttributeIconSize 0
+
+package jakarta.servlet.http {
+    class HttpServletRequest
+}
+
+package org.springframework {
+    package web.bind.annotation {
+        interface "@RestController" as RestController
+        interface "@RequestMapping" as RequestMapping
+        interface "@PathVariable" as PathVariable
+        interface "@RequestParam" as RequestParam
+        interface "@ExceptionHandler" as ExceptionHandler
+        interface "@ResponseStatus" as ResponseStatus
+
+        RequestMapping .left[hidden].> RestController
+    }
+
+    package http {
+        class ResponseEntity<T>
+    }
+    package hateoas {
+        class CollectionModel<E>
+    }
+    package util {
+        class MultiValueMap<K,V>
+    }
+
+    ResponseEntity .up[hidden].> CollectionModel
+}
+
+package java.util {
+    class UUID
+
+    UUID .up[hidden].> HttpServletRequest
+}
+
+package com.acme.auto {
+    package entity {
+        class Auto << entity >>
+    }
+
+    package service {
+        class AutoReadService << control >> << @Service >>
+        class NotFoundException
+
+        AutoReadService .right[hidden].> NotFoundException
+    }
+
+    package rest #DDDDDD {
+        class AutoModel <<entity>>
+
+        class AutoGetController << boundary >> << @RestController >> << @RequestMapping >> {
+            + @GetMapping get(@RequestParam queryParams: MultiValueMap<String, String>, request: HttpServletRequest)
+        }
+
+        class CommonExceptionHandler << @ControllerAdvice >> {
+            + @ExceptionHandler @ResponseStatus onNotFound(ex: NotFoundException)
+        }
+
+        AutoGetController o-right-> "1" AutoReadService : service
+        AutoGetController ..> AutoModel
+        AutoGetController ..> Auto
+
+        AutoGetController .up.> CollectionModel
+        AutoGetController .right.> HttpServletRequest
+        AutoGetController .up.> MultiValueMap
+        AutoGetController .up.> ResponseEntity
+
+        AutoGetController .up.> RestController
+        AutoGetController .up.> RequestMapping
+        AutoGetController .up.> PathVariable
+        AutoGetController .up.> RequestParam
+
+        CommonExceptionHandler .up.> ExceptionHandler
+        CommonExceptionHandler .up.> ResponseStatus
+        CommonExceptionHandler ..> NotFoundException
+        CommonExceptionHandler .up[hidden].> AutoModel
+        CommonExceptionHandler .[hidden].> Auto
+
+        AutoGetController .right.> UUID
+
+        AutoModel ..> Auto
+        AutoModel .[hidden].> AutoReadService
+    }
+}
+
+hide empty members
+
+@enduml

@@ -1,0 +1,100 @@
+@startuml AutoHandler
+
+skinparam classAttributeIconSize 0
+
+package jakarta.servlet.http {
+    class HttpServletRequest
+}
+
+package org.springframework {
+    package stereotype {
+        interface "@Controller" as Controller
+    }
+
+    package web.bind.annotation {
+        interface "@RequestMapping" as RequestMapping
+        interface "@PathVariable" as PathVariable
+        interface "@RequestBody" as RequestBody
+        interface "@ExceptionHandler" as ExceptionHandler
+
+        RequestBody .left[hidden].> Controller
+        ExceptionHandler .left[hidden].> Controller
+    }
+
+    package http {
+        class ResponseEntity<T>
+        class ProblemDetail
+
+        package converter {
+            class HttpMessageNotReadableException
+        }
+
+        ResponseEntity .[hidden].> ProblemDetail
+        ResponseEntity .left[hidden].> Controller
+        ProblemDetail .[hidden].> HttpMessageNotReadableException
+    }
+}
+
+package java.util {
+    interface Collection<T>
+    class UUID
+    class Optional<T>
+
+    Collection .[hidden].> Optional
+    Optional .[hidden].> UUID
+    HttpServletRequest .up[hidden].> UUID
+}
+
+package com.acme.auto {
+    package service {
+        class AutoWriteService << control >> << @Service >>
+
+        class ConstraintViolationsException
+        class EmailExistsException
+        class VersionOutdatedException
+    }
+
+    package rest #DDDDDD {
+        class AutoDTO <<entity>>
+        AutoDTO .[hidden].> UUID
+        AutoDTO .[hidden].> AutoWriteService
+
+        class VersionInvalidException
+
+        class AutoWriteController << boundary >> << @Controller >> << @RequestMapping >> {
+            + @PostMapping post(@RequestBody autoUserDTO: AutoUserDTO, request: HttpServletRequest): ResponseEntity<ProblemDetail>
+            + @PutMapping put(@PathVariable id: UUID, @RequestBody autoDTO: AutoDTO, @RequestHeader("If-Match") version: Optional<String>, request: HttpServletRequest): ResponseEntity<Void>
+            + @DeleteMapping deleteById(@PathVariable id: UUID)
+            + @ExceptionHandler onConstraintViolations(ex: ConstraintViolationsException, req: HttpServletRequest): ResponseEntity<ProblemDetail>
+            + @ExceptionHandler onEmailExists(ex: EmailExistsException, req: HttpServletRequest): ResponseEntity<ProblemDetail>
+            + @ExceptionHandler onVersionOutdated(ex: VersionOutdatedException, req: HttpServletRequest): ResponseEntity<ProblemDetail>
+            + @ExceptionHandler onMessageNotReadable(ex: HttpMessageNotReadableException, req: HttpServletRequest): ResponseEntity<ProblemDetail>
+        }
+
+        AutoWriteController o-right-> "1" AutoWriteService : service
+        AutoWriteController ..> AutoUserDTO
+        AutoWriteController ..> AutoDTO
+        AutoWriteController .up.> UUID
+        AutoWriteController .up.> Optional
+        AutoWriteController .up.> Collection
+        AutoWriteController ..> ConstraintViolationsException
+        AutoWriteController ..> EmailExistsException
+        AutoWriteController ..> VersionOutdatedException
+        AutoWriteController .up.> HttpMessageNotReadableException
+        AutoWriteController ..> VersionInvalidException
+
+        AutoWriteController .up.> HttpServletRequest
+        AutoWriteController .up.> ResponseEntity
+        AutoWriteController .up.> ProblemDetail
+
+        AutoWriteController .up.> Controller
+        AutoWriteController .up.> RequestMapping
+        AutoWriteController .up.> PathVariable
+        AutoWriteController .up.> RequestBody
+        AutoWriteController .up.> ExceptionHandler
+    }
+}
+
+hide empty members
+
+@enduml

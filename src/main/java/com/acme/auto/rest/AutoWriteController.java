@@ -112,15 +112,12 @@ public class AutoWriteController {
      */
     private int getVersion(final Optional<String> versionOpt, final HttpServletRequest request) {
         log.trace("getVersion: versionOpt={}", versionOpt);
-        if (versionOpt.isEmpty()) {
-            throw new VersionInvalidException(
-                PRECONDITION_REQUIRED,
-                "Versionsnummer fehlt",
-                URI.create(request.getRequestURL().toString())
-            );
-        }
+        final var versionStr = versionOpt.orElseThrow(() -> new VersionInvalidException(
+            PRECONDITION_REQUIRED,
+            "Versionsnummer fehlt",
+            URI.create(request.getRequestURL().toString())
+        ));
 
-        final var versionStr = versionOpt.get();
         if (versionStr.length() < 3 ||
             versionStr.charAt(0) != '"' ||
             versionStr.charAt(versionStr.length() - 1) != '"'

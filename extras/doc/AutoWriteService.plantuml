@@ -1,0 +1,47 @@
+@startuml AutoWriteService
+
+skinparam classAttributeIconSize 0
+
+package java.util {
+    class UUID
+}
+
+package org.springframework {
+    package stereotype {
+        interface Service
+    }
+
+    package transaction.annotation {
+        interface Transactional
+    }
+}
+
+package com.acme.auto {
+    package entity {
+        class Auto << entity >>
+        Auto .up[hidden].> UUID
+    }
+
+    package repository {
+        interface AutoRepository << control >>
+    }
+
+    package service #DDDDDD {
+        class AutoWriteService << control >> << @Service >> {
+            + create(auto: Auto): Auto
+            + update(auto: Auto, id: UUID, version: String): Auto
+            + deleteById(id: UUID)
+        }
+
+        AutoWriteService o--> "1" AutoRepository : repo
+
+        AutoWriteService .right.> Auto
+        AutoWriteService .up.> UUID
+        AutoWriteService .up.> Service
+        AutoWriteService .up.> Transactional
+    }
+}
+
+hide empty members
+
+@enduml

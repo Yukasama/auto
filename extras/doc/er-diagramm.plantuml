@@ -1,0 +1,46 @@
+@startuml ER Diagramm
+
+' hide the spot
+hide circle
+
+' evtl. Prbleme mit Kraehenfuessen vermeiden
+skinparam linetype ortho
+
+entity "Besitzer" {
+  * id : UUID <<generated>>
+  --
+  * vorname : text
+  * nachname : text
+}
+
+entity "Auto" {
+  * id : UUID <<generated>>
+  --
+  * **autohaus_id**: UUID <<FK>>
+  * version: integer
+  * name : text
+  * marke : text
+  * kennzeichen : text <<unique>>
+  * pferdeStaerke: integer
+  * preis : decimal
+  * **besitzer_id**: UUID <<FK>>
+    features: text
+  * createdAt: timestamp
+  * updatedAt: timestamp
+  autohausName: text
+  autohausHomepage: text
+}
+
+entity "Reparatur" {
+  * id : UUID <<generated>>
+  --
+  * beschreibung: text
+  * preis : decimal
+  * datum : timestamp
+  * **auto_id**: UUID <<FK>>
+}
+
+Auto ||.left.|| Besitzer
+Auto ||.right.o{ Reparatur
+
+@enduml

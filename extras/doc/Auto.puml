@@ -7,6 +7,7 @@ package java {
     package util {
         class UUID
         interface List<T>
+        class URI
     }
 
     package math {
@@ -19,44 +20,73 @@ package java {
 }
 
 package com.acme.auto.entity {
-  class Reparatur {
+  class Reparatur <<entity>> {
+    @Id
+    @GeneratedValue
     UUID id
     String beschreibung
     LocalDate datum
     BigDecimal kosten
   }
 
-  class Besitzer {
+  class Besitzer <<entity>> {
+    @Id
+    @GeneratedValue
     UUID id
     String vorname
     String nachname
   }
 
-  class Auto <<entity>> {
-    UUID id
-    String name
-    Marke marke
-    String kennzeichen
-    int pferdeStaerke
-    BigDecimal preis
-    Besitzer besitzer
-    List<Reparatur> reparaturen
-  }
-
-  enum Marke {
+  enum MarkeType {
     VOLKSWAGEN
     MERCEDES
     FORD
     TESLA
   }
 
-  Auto *--> "1" Besitzer : besitzer
-  Auto *--> "0..*" Reparatur : reparaturen
-  Auto .up.> Marke
+  enum FeatureType {
+    AUTONOM
+    SPORTMODUS
+    DISPLAY
+  }
+
+  class Auto <<entity>> << @Entity >> << @Table >> {
+    @Id
+    @GeneratedValue
+    UUID id
+    @Version
+    int version
+    String name
+    @Enumerated(String)
+    MarkeType marke
+    String kennzeichen
+    int pferdeStaerke
+    BigDecimal preis
+    @Transient
+    @UniqueElements
+    List<FeatureType> features
+    @Column
+    String featuresStr
+    Besitzer besitzer
+    List<Reparatur> reparaturen
+    @CreationTimestamp
+    LocalDateTime createdAt
+    @UpdateTimestamp
+    LocalDateTime updatedAt
+    String autohausName
+    URI autohausHomepage
+  }
+
+  Auto *--> "1" Besitzer : @OneToOne \ besitzer
+  Auto *--> "0..*" Reparatur : @OneToMany \ reparaturen
+
+  Auto .up.> MarkeType
+  Auto .up.> FeaturesType
 
   Auto ..> UUID
   Auto ..> BigDecimal
   Auto ..> List
+  Auto ..> URI
 
   Besitzer ..> UUID
 

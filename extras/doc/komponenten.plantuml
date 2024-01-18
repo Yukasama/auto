@@ -1,0 +1,55 @@
+@startuml Komponenten
+
+package com.acme.auto #DDDDDD {
+    package rest <<boundary>> #FFFFFF {
+        [@RestController\nAutoGetController] as AutoGetController
+        [@RestController\nAutoWriteController] as AutoWriteController
+    }
+
+    package service <<control>> #FFFFFF {
+        [@Service\nAutoReadService] as AutoReadService
+        [@Service\nAutoWriteService] as AutoWriteService
+    }
+
+    package repository <<control>> #FFFFFF {
+        [AutoRepository]
+    }
+
+    package entity <<entity>> #FFFFFF {
+        [Auto]
+    }
+}
+
+cloud {
+    [Spring Data]
+}
+
+database "auto (PostgreSQL)" {
+    [Tabelle auto]
+    [Tabelle reparatur]
+    [Tabelle besitzer]
+
+    [Tabelle auto] -[hidden]-> [Tabelle besitzer]
+    [Tabelle besitzer] -[hidden]-> [Tabelle reparatur]
+}
+
+RESTClient ~~> [AutoGetController]
+RESTClient ~~> [AutoWriteController]
+
+[AutoGetController] --> [AutoReadService]
+[AutoWriteController] --> [AutoWriteService]
+[AutoReadService] --> [AutoRepository]
+[AutoWriteService] --> [AutoRepository]
+
+[AutoGetController] .left.> [Auto]
+[AutoWriteController] ..> [Auto]
+[AutoReadService] .left.> [Auto]
+[AutoWriteService] ..> [Auto]
+[AutoRepository] ..> [Auto]
+
+[AutoRepository] ~right~> [Spring Data]
+[Spring Data] ~right~> [Tabelle auto]
+[Spring Data] ~~> [Tabelle besitzer]
+[Spring Data] ~~> [Tabelle reparatur]
+
+@enduml
